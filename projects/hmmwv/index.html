@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="공개 HMMWV 정비교범으로 같은 경량 모델의 단독 답변과 RAG 답변을 비교했습니다. 필요한 근거를 찾았는지, 답변이 원문에 맞는지, 필수 내용을 담았는지 나눠 확인했습니다.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#ffffff">
+  <title>험비 교범 RAG | 개발 포트폴리오</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/styles.css">
+  <script src="../../assets/site.js" defer></script>
+</head>
+<body data-project="hmmwv">
+<a class="skip-link" href="#main">본문으로 바로가기</a>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="../../index.html" aria-label="개발 포트폴리오 홈">개발 포트폴리오</a>
+    <button class="menu-toggle" data-menu-button aria-controls="site-navigation" aria-expanded="false" aria-label="메뉴 열기" hidden>메뉴 <span aria-hidden="true">☰</span></button>
+    <nav class="site-nav" id="site-navigation" data-navigation aria-label="주요 메뉴">
+      <a href="../../index.html#projects">프로젝트</a>
+      <a href="../../index.html#cases">문제 해결 사례</a>
+      <a href="../../index.html#learning">학습과 실험</a>
+      <a class="nav-external" href="https://github.com/HyungminYoon1" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+  </div>
+</header>
+
+<main class="container" id="main">
+  <div class="breadcrumb"><a href="../../index.html#projects">프로젝트</a><span aria-hidden="true">/</span><span>험비 교범 RAG</span></div>
+  <div class="case-heading">
+    <p class="case-kicker">험비 교범 RAG / 개인 연구</p>
+    <h1>교범 검색이 AI 답변에 미치는 효과 비교</h1>
+    <p class="lead">같은 경량 모델에 교범 검색 결과를 제공하고, 답변이 원문으로 뒷받침되는지와 필요한 내용을 모두 담았는지 비교했습니다.</p>
+  </div>
+  <dl class="case-meta"><div><dt>유형과 역할</dt><dd>개인 연구 / 전처리, 검색, 생성과 평가 구성</dd></div><div><dt>비교 조건</dt><dd>같은 Qwen 모델과 공통 프롬프트</dd></div><div><dt>주요 기술</dt><dd>Qwen3-4B, BGE-M3, FAISS, Ollama, Python</dd></div></dl>
+  <section class="case-brief" aria-label="핵심 요약"><dl><div><dt>연구 질문</dt><dd>교범 검색 결과를 제공하면 근거 없는 답변과 필수 내용 누락이 줄어드는가</dd></div><div><dt>비교 방법</dt><dd>같은 Qwen 모델과 공통 프롬프트, 단독 모델과 RAG 두 조건</dd></div><div><dt>결과</dt><dd>근거 지지율 24.5% → 86.3%. 주 분석 47문항, 고정 답변을 공통 기준으로 사후 AI 검토.</dd></div></dl></section>
+  <div class="case-layout">
+    <aside class="case-toc" aria-label="이 글의 목차">
+      <p>이 글의 내용</p>
+      <ol><li><a href="#design"><span class="mono">01</span> &nbsp;같은 모델로 조건 비교</a></li><li><a href="#pipeline"><span class="mono">02</span> &nbsp;교범 처리와 답변 생성</a></li><li><a href="#results"><span class="mono">03</span> &nbsp;비교 결과</a></li><li><a href="#evaluation"><span class="mono">04</span> &nbsp;평가 과정과 오류 분석</a></li><li><a href="#sources"><span class="mono">05</span> &nbsp;공개 자료와 후속 연구</a></li></ol>
+      <div class="toc-bottom">비교 조건부터 답변 검토까지<br>실험 순서대로 정리했습니다.</div>
+    </aside>
+    <article class="case-content">
+<section class="case-section" id="design"><span class="section-title-index">01 / 연구 질문</span><h2>모델은 같게, 교범 검색의 유무만 다르게</h2><p>정비 질문에는 수치뿐 아니라 적용 조건도 함께 답해야 합니다. 교범 검색 자료를 제공했을 때 답변의 근거와 필수 내용 누락이 어떻게 달라지는지 비교했습니다.</p><p>RAG는 질문과 관련된 교범 대목을 먼저 찾아 모델에 함께 보여주는 방식입니다. 같은 모델에 참고 자료를 제공하는 조건과 제공하지 않는 조건을 비교했습니다.</p>
+<figure class="process-diagram" aria-labelledby="hmmwv-comparison-title">
+  <figcaption id="hmmwv-comparison-title"><span class="diagram-label">비교 설계</span><strong>같은 질문을 두 조건에 넣고, 검색 자료 제공 여부를 비교</strong></figcaption>
+  <div class="diagram-endpoint"><strong>공통 조건</strong><span>같은 Qwen3-4B 모델과 공통 프롬프트<br>60문항을 두 조건에서 각각 3회 실행</span></div>
+  <div class="experiment-conditions">
+    <section class="experiment-condition" aria-labelledby="hmmwv-without-rag">
+      <h3 id="hmmwv-without-rag">단독 모델 <small>LLM Only</small></h3>
+      <ol class="condition-steps">
+        <li><span>입력</span><strong>질문만 전달</strong><small>교범 검색 자료 없이 질문에 답변</small></li>
+        <li><span>생성</span><strong>로컬 Qwen 모델</strong><small>공통 프롬프트로 답변 생성</small></li>
+        <li><span>기록</span><strong>단독 모델 답변 저장</strong><small>이후 같은 문항의 RAG 답변과 대조</small></li>
+      </ol>
+    </section>
+    <section class="experiment-condition condition-with-context" aria-labelledby="hmmwv-with-rag">
+      <h3 id="hmmwv-with-rag">검색 결합 <small>RAG</small></h3>
+      <ol class="condition-steps">
+        <li><span>입력</span><strong>질문 + 교범 검색 상위 5개</strong><small>해당 질문에서 실제 찾은 자료를 전달</small></li>
+        <li><span>생성</span><strong>같은 로컬 Qwen 모델</strong><small>공통 프롬프트와 검색 자료로 답변 생성</small></li>
+        <li><span>기록</span><strong>RAG 답변과 검색 자료 저장</strong><small>어떤 근거를 보고 답했는지 함께 보관</small></li>
+      </ol>
+    </section>
+  </div>
+  <p class="diagram-takeaway">비교한 차이는 교범 검색 자료의 제공 여부입니다. 두 조건에서 모델 가중치는 그대로 사용했습니다.</p>
+</figure>
+<div class="table-wrap"><table><caption class="sr-only">고정 실험 설정</caption><thead><tr><th scope="col">항목</th><th scope="col">설정</th></tr></thead><tbody><tr><td>문서 범위</td><td>공개 교범의 제1·2장에 해당하는 833쪽</td></tr><tr><td>검색 자료</td><td>8,344개 청크, 청크당 최대 500토큰</td></tr><tr><td>검색</td><td>BGE-M3, FAISS, 상위 5개</td></tr><tr><td>생성 모델</td><td>Qwen3-4B-Instruct-2507 / Q4_K_M GGUF</td></tr><tr><td>질문과 실행</td><td>60문항 × 2조건 × 3회차 = 360개 요청</td></tr><tr><td>내용 품질 분석</td><td>첫 회차 120개 답변. 조건을 충분히 특정한 47문항을 주 분석</td></tr></tbody></table></div><p class="small-note">질문은 단일 근거 20문항, 다중 근거 30문항, 답변불가 10문항으로 구성했습니다. 답변 가능한 50문항 중 측정점, 장비나 시험 단계가 충분히 특정되지 않은 3문항은 조건부 참고로 분리했습니다. 같은 47문항을 주 분석에 사용하고, 답변불가 10문항은 별도로 검토했습니다.</p></section>
+<section class="case-section" id="pipeline"><span class="section-title-index">02 / 처리 구조</span><h2>교범을 검색 자료로 준비하고, 질문에 맞는 대목만 전달</h2><p>교범 전체를 한 번에 모델에 넣는 대신 작은 조각인 청크로 나눴습니다. 문서와 질문의 의미를 숫자 벡터로 바꾸어 비교하고, 질문과 가까운 자료를 찾도록 구성했습니다.</p>
+<figure class="process-diagram" aria-labelledby="hmmwv-pipeline-title">
+  <figcaption id="hmmwv-pipeline-title"><span class="diagram-label">RAG의 처리 구조</span><strong>검색 자료를 미리 준비하고, 질문이 들어오면 상위 근거를 찾기</strong></figcaption>
+  <div class="diagram-lane">
+    <h3>자료 준비</h3>
+    <ol class="diagram-pipeline three-steps">
+      <li><span class="step-number">1</span><strong>공개 교범 833쪽</strong><span>텍스트, 표와 적용 조건 추출</span></li>
+      <li><span class="step-number">2</span><strong>8,344개 청크</strong><span>청크당 최대 500토큰으로 분할</span></li>
+      <li><span class="step-number">3</span><strong>의미 벡터와 검색 인덱스</strong><span>자료를 숫자로 표현하고 검색용으로 저장</span><small>BGE-M3 / FAISS</small></li>
+    </ol>
+  </div>
+  <div class="diagram-lane">
+    <h3>질문에 답할 때</h3>
+    <ol class="diagram-pipeline three-steps">
+      <li><span class="step-number">1</span><strong>질문을 벡터로 변환</strong><span>교범 자료와 같은 임베딩 모델 사용</span><small>BGE-M3</small></li>
+      <li><span class="step-number">2</span><strong>상위 5개 근거 검색</strong><span>실제로 모델에 전달할 교범 대목 선택</span><small>FAISS</small></li>
+      <li class="step-emphasis"><span class="step-number">3</span><strong>질문과 근거로 답변 생성</strong><span>답변과 당시 검색 자료를 함께 기록</span><small>Qwen / Ollama</small></li>
+    </ol>
+  </div>
+  <p class="diagram-takeaway">생성에 넣는 것은 질문과 실제 검색 자료입니다. 평가용 정답 근거와 모범답안은 생성 입력과 분리했습니다.</p>
+</figure>
+<p>정비 답변은 로컬 모델로 생성하고, 답변과 검색 자료를 저장했습니다. 저장된 답변은 별도의 평가 단계에서 원문과 대조했습니다.</p></section>
+<section class="case-section" id="results"><span class="section-title-index">03 / 비교 결과</span><h2>근거 지지율과 필수 요소 충족도를 나눠 비교</h2>
+<dl class="metric-definitions">
+  <div><dt>근거 지지율</dt><dd>답변에 쓴 각 주장이 원문으로 뒷받침되는지 확인</dd></div>
+  <div><dt>필수 요소 충족도</dt><dd>질문에 필요한 내용을 답변에 얼마나 담았는지 확인</dd></div>
+  <div><dt>모든 필수 요소 충족</dt><dd>필요한 요소를 모두 담은 문항 수를 따로 집계</dd></div>
+</dl>
+<div class="comparison-panel"><h3>원문이 뒷받침하는 답변 내용의 비율: 근거 지지율</h3><div class="comparison-row"><span>단독 모델</span><span class="track"><span class="bar p245"></span></span><b>24.5%</b></div><div class="comparison-row"><span>RAG</span><span class="track"><span class="bar green p863"></span></span><b>86.3%</b></div></div>
+<div class="table-wrap"><table><caption class="sr-only">주 분석 47문항의 공통 기준 평가</caption><thead><tr><th scope="col">지표 / 47문항</th><th scope="col">단독 모델</th><th scope="col">RAG</th></tr></thead><tbody><tr><td>근거 지지율</td><td>24.5%</td><td class="metric">86.3%</td></tr><tr><td>필수 답변 요소 충족도</td><td>26.6%</td><td class="metric">80.0%</td></tr><tr><td>모든 필수 요소를 충족한 문항</td><td>5 / 47</td><td>29 / 47</td></tr></tbody></table></div><p class="small-note">common-rubric-final-20261008 기준입니다. 두 조건의 같은 문항을 평가했습니다. 근거 지지율은 답변 전체의 정답률과 다르며, 필수 요소 충족도도 문항 단위 합격률과 다릅니다.</p>
+<div class="callout warm"><strong>같은 답변에 보완한 평가 기준을 적용했습니다</strong><p>답변을 확인한 뒤 원문 근거와 필수 요소의 판정 기준을 보완해 다시 평가한 수치입니다. 생성 답변과 모델은 그대로 유지했고, 답변 전체는 AI로 검토했습니다. 외부 정비 전문가의 독립 검증은 후속 과제로 남아 있습니다.</p></div></section>
+<section class="case-section" id="evaluation"><span class="section-title-index">04 / 오류 분석</span><h2>근거가 있는 답변에도 필요한 내용이 빠졌습니다</h2><p>주 분석에서 RAG 답변의 모든 주장이 원문으로 뒷받침되면서도, 질문에 필요한 내용 일부가 빠진 경우가 7개 있었습니다. 답한 내용이 맞는지와 필요한 내용을 빠짐없이 담았는지를 따로 확인했습니다.</p>
+<figure class="process-diagram" aria-labelledby="hmmwv-evaluation-title">
+  <figcaption id="hmmwv-evaluation-title"><span class="diagram-label">평가 과정</span><strong>전체 실행 기록에서 분석할 답변을 고르고, 같은 기준으로 대조</strong></figcaption>
+  <ol class="diagram-pipeline three-steps">
+    <li><span class="step-number">1</span><strong>360개 생성 요청</strong><span>60문항 × 2조건 × 3회차</span></li>
+    <li><span class="step-number">2</span><strong>첫 회차 120개 답변</strong><span>60문항의 두 조건 답변을 내용 검토</span></li>
+    <li class="step-emphasis"><span class="step-number">3</span><strong>주 분석 47문항</strong><span>같은 문항을 두 조건에서 비교</span></li>
+  </ol>
+  <div class="evaluation-inputs">
+    <div><h3>검토할 자료</h3><p>질문, 저장된 답변과 당시 검색 결과</p></div>
+    <div><h3>대조할 기준</h3><p>공통 원문 근거와 필수 답변 요소</p></div>
+  </div>
+  <p class="evaluation-method">외부 API 자동평가 후, 저장된 답변 전체를 공통 기준으로 AI 전수 검토했습니다.</p>
+  <p class="diagram-takeaway">각 답변의 주장과 필수 요소를 따로 확인해, 근거 오류와 내용 누락을 구분했습니다.</p>
+</figure>
+<div class="table-wrap"><table><caption class="sr-only">서로 다르게 확인한 오류</caption><thead><tr><th scope="col">구분</th><th scope="col">확인한 문제</th></tr></thead><tbody><tr><td>근거 확보</td><td>질문에 필요한 근거를 검색했는가</td></tr><tr><td>답변의 근거 지지</td><td>답변에 쓴 내용을 원문이 실제로 뒷받침하는가</td></tr><tr><td>필수 요소 충족</td><td>수치 외에 액면 기준이나 적용 조건까지 답했는가</td></tr><tr><td>조건 적용</td><td>제시된 수치 범위에 특정 값이 포함되는지 올바르게 판단했는가</td></tr></tbody></table></div><p>검색의 평균 Recall@5는 78.0%였고, 50개 답변 가능 문항 중 필요한 근거를 모두 확보한 경우는 31개였습니다. 검색, 근거 해석, 필수 내용 누락을 나누어야 다음에 무엇을 바꿀지 정할 수 있었습니다.</p></section>
+<section class="case-section" id="sources"><span class="section-title-index">05 / 공개 자료</span><h2>원본 기록과 판정 이유를 함께 공개</h2><ul class="evidence-list">
+<li><a class="evidence-link" href="https://github.com/HyungminYoon1/hmmwv-rag-experiment" target="_blank" rel="noopener noreferrer"><span>연구 공개 저장소<small>실험 설명, 코드, 실행 기록과 재실행 절차</small></span><span aria-hidden="true">↗</span></a></li>
+<li><a class="evidence-link" href="https://github.com/HyungminYoon1/hmmwv-rag-experiment/releases/tag/v2026.10.08" target="_blank" rel="noopener noreferrer"><span>고정 배포 v2026.10.08<small>실험 자료와 검토 근거 묶음</small></span><span aria-hidden="true">↗</span></a></li>
+<li><a class="evidence-link" href="https://github.com/HyungminYoon1/hmmwv-rag-experiment/blob/v2026.10.08/docs/results.md" target="_blank" rel="noopener noreferrer"><span>결과와 해석<small>분석 대상, 지표 정의와 오류 사례</small></span><span aria-hidden="true">↗</span></a></li>
+<li><a class="evidence-link" href="https://github.com/HyungminYoon1/hmmwv-rag-experiment/blob/v2026.10.08/experiment/reviews/common-rubric-final-20261008/report.md" target="_blank" rel="noopener noreferrer"><span>공통 기준 전수 검토 보고서<small>답변별 판정과 원문 근거</small></span><span aria-hidden="true">↗</span></a></li>
+</ul><p>코드, 데이터 정리와 평가 보조에는 AI 도구를 활용했습니다. 모델 미세조정과 RAG를 함께 비교하는 작업은 후속 연구입니다.</p></section>
+      <nav class="case-bottom" aria-label="프로젝트 이동"><a href="../../index.html#projects">← 전체 프로젝트</a><a href="../nodease/">Nodease 사례 →</a></nav>
+    </article>
+  </div>
+</main>
+
+<footer class="site-footer"><div class="container footer-inner">
+  <p>개발 포트폴리오 <span aria-hidden="true">/</span> 백엔드 및 AI 응용 개발</p>
+  <p>최종 수정 2026.11.04 <span aria-hidden="true"> · </span> <a href="../../index.html#approach">작성 방식과 AI 활용</a></p>
+</div></footer>
+</body>
+</html>

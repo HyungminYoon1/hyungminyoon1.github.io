@@ -1,0 +1,16 @@
+dist/
+node_modules/
+output/
+.local/
+docs/
+.playwright-cli/
+.env
+.env.*
+*.log
+*.pem
+*.key
+*.p12
+*.pfx
+*.docx
+*.pdf
+*.xlsx

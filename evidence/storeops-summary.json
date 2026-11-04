@@ -1,0 +1,35 @@
+{
+  "title": "StoreOps 승인과 도구 실행 검증 기록 요약",
+  "summary_created_on": "2026-11-04",
+  "original_verification_date": "2026-08-20",
+  "artifact_type": "과거 보고서에서 발췌한 요약. 새 시험 결과 또는 원본 실행 로그가 아님.",
+  "source": {
+    "file": "phase-5-implementation-verification-2026-08-20.md",
+    "sha256": "bf790b94dd7c9d5249335f9aaa448a8fe7690a5d3f2b35a02ff84dd16271521e"
+  },
+  "cases": [
+    {
+      "scenario": "같은 요청 식별값과 실행 인자의 동시 요청 32개",
+      "result": "초안 등록 1건",
+      "boundary": "단일 프로세스 인메모리 합성 도구"
+    },
+    {
+      "scenario": "같은 요청 식별값에 다른 실행 인자",
+      "result": "충돌로 거부"
+    },
+    {
+      "scenario": "도구 호출 뒤 결과를 확인할 수 없는 실패",
+      "result": "호출 1회, 자동 재시도 0회, OUTCOME_UNKNOWN"
+    },
+    {
+      "scenario": "허용된 도구 정보와 서버 정보 불일치",
+      "result": "도구 호출 0회"
+    }
+  ],
+  "excluded_claims": [
+    "다중 서버 전체의 중복 실행 방지",
+    "실제 외부 주문 또는 결제 연동",
+    "현재 운영 중인 공개 서비스",
+    "이번 포트폴리오 작성 중 프로젝트 시험 재실행"
+  ]
+}

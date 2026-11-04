@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="기업의 AI 업무 자동화와 지식 통합 플랫폼에서 문서 처리와 RAG를 맡았습니다. 새 문서를 준비하는 과정과 검색에 반영하는 시점을 나누고, 여러 지식베이스를 조회할 때의 반복 대기를 줄였습니다.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#ffffff">
+  <title>Nodease | 개발 포트폴리오</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/styles.css">
+  <script src="../../assets/site.js" defer></script>
+</head>
+<body data-project="nodease">
+<a class="skip-link" href="#main">본문으로 바로가기</a>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="../../index.html" aria-label="개발 포트폴리오 홈">개발 포트폴리오</a>
+    <button class="menu-toggle" data-menu-button aria-controls="site-navigation" aria-expanded="false" aria-label="메뉴 열기" hidden>메뉴 <span aria-hidden="true">☰</span></button>
+    <nav class="site-nav" id="site-navigation" data-navigation aria-label="주요 메뉴">
+      <a href="../../index.html#projects">프로젝트</a>
+      <a href="../../index.html#cases">문제 해결 사례</a>
+      <a href="../../index.html#learning">학습과 실험</a>
+      <a class="nav-external" href="https://github.com/HyungminYoon1" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+  </div>
+</header>
+
+<main class="container" id="main">
+  <div class="breadcrumb"><a href="../../index.html#projects">프로젝트</a><span aria-hidden="true">/</span><span>Nodease</span></div>
+  <div class="case-heading">
+    <p class="case-kicker">Nodease / 5인 팀 프로젝트</p>
+    <h1>문서 처리와 권한 기반 검색</h1>
+    <p class="lead">Nodease의 지식 통합과 RAG 영역에서 문서 처리와 권한 기반 검색을 맡았습니다.</p>
+  </div>
+  <dl class="case-meta"><div><dt>유형과 담당</dt><dd>5인 팀 프로젝트 / 지식 통합과 RAG</dd></div><div><dt>작업 기간</dt><dd>2026.06–07 팀 개발과 후속 개선</dd></div><div><dt>주요 기술</dt><dd>Python, FastAPI, Celery, Redis, PostgreSQL</dd></div></dl>
+  <section class="case-brief" aria-label="핵심 요약"><dl><div><dt>문제</dt><dd>문서 재처리 중 기존 자료가 사라질 위험, 순차 검색의 대기시간 누적</dd></div><div><dt>구현</dt><dd>새 버전 준비 후 검색 대상 교체, 최대 5개 동시 검색, 검색별 읽기 전용 DB 세션</dd></div><div><dt>검증</dt><dd>10개 조회 중앙값 203.3ms → 42.4ms. 각 검색에 20ms 합성 지연을 둔 로컬 20회 시험.</dd></div></dl></section>
+  <div class="case-layout">
+    <aside class="case-toc" aria-label="이 글의 목차">
+      <p>이 글의 내용</p>
+      <ol><li><a href="#overview"><span class="mono">01</span> &nbsp;프로젝트와 담당 범위</a></li><li><a href="#version"><span class="mono">02</span> &nbsp;실패해도 기존 자료 유지</a></li><li><a href="#retrieval"><span class="mono">03</span> &nbsp;여러 검색의 대기 줄이기</a></li><li><a href="#hierarchical"><span class="mono">04</span> &nbsp;계층형 검색 비교</a></li><li><a href="#sources"><span class="mono">05</span> &nbsp;근거와 남은 일</a></li></ol>
+      <div class="toc-bottom">구현 방법과 시험 결과를<br>문제별로 정리했습니다.</div>
+    </aside>
+    <article class="case-content">
+<section class="case-section" id="overview"><span class="section-title-index">01 / 프로젝트</span><h2>AI 업무 흐름과 사내 지식을 연결하는 플랫폼</h2><p>Nodease는 자연어와 시각적 편집 화면으로 AI 업무 흐름을 만들고 실행하는 플랫폼입니다. 사내 문서와 접근 권한, 실행 이력을 연결합니다.</p><p>문서를 검색 가능한 자료로 만들고, 사용자가 접근할 수 있는 문서에서 답변 근거를 찾도록 구현했습니다. 이 글에서는 문서 재처리와 여러 지식베이스의 검색 대기를 다룹니다.</p><p>지식베이스는 검색할 문서를 묶어 관리하는 단위입니다. RAG는 관련 자료를 찾아 AI가 답변에 참고하도록 제공하는 방식이며, 활성 버전은 현재 검색에 사용하는 문서 버전입니다.</p>
+<figure class="process-diagram" aria-labelledby="nodease-structure-title">
+  <figcaption id="nodease-structure-title"><span class="diagram-label">담당 영역의 구조</span><strong>문서를 준비하는 과정과 검색에 사용하는 과정</strong></figcaption>
+  <div class="diagram-lane">
+    <h3>문서를 등록할 때</h3>
+    <ol class="diagram-pipeline four-steps">
+      <li><span class="step-number">1</span><strong>처리 요청 접수</strong><span>문서와 작업 상태 기록</span><small>FastAPI</small></li>
+      <li><span class="step-number">2</span><strong>별도 작업으로 처리</strong><span>오래 걸리는 작업 분리</span><small>Celery / Redis</small></li>
+      <li><span class="step-number">3</span><strong>검색 자료 만들기</strong><span>텍스트 추출, 조각 나누기, 임베딩</span></li>
+      <li><span class="step-number">4</span><strong>새 버전 보관</strong><span>문서 버전과 검색 자료 저장</span><small>PostgreSQL / pgvector</small></li>
+    </ol>
+  </div>
+  <div class="diagram-lane">
+    <h3>자료를 검색할 때</h3>
+    <ol class="diagram-pipeline four-steps">
+      <li><span class="step-number">1</span><strong>질문과 검색 대상</strong><span>사용자 또는 AI 업무 흐름의 요청</span></li>
+      <li><span class="step-number">2</span><strong>접근 권한 확인</strong><span>허용된 조직과 지식베이스로 한정</span></li>
+      <li><span class="step-number">3</span><strong>활성 버전 검색</strong><span>현재 사용 중인 자료에서 근거 찾기</span></li>
+      <li><span class="step-number">4</span><strong>검색 근거 전달</strong><span>AI 업무 흐름에서 참고</span></li>
+    </ol>
+  </div>
+  <p class="diagram-takeaway">새 자료를 만드는 중에도 검색은 기존 활성 버전을 사용합니다. 준비가 끝나고 검사를 통과해야 검색 대상을 새 버전으로 바꿉니다.</p>
+  <p class="diagram-scope">담당한 문서 처리와 검색 경로를 정리한 그림입니다. 임베딩은 문장의 의미를 검색용 숫자 벡터로 바꾸는 과정입니다.</p>
+</figure>
+<ul class="tags" aria-label="사용 기술"><li>FastAPI</li><li>SQLAlchemy</li><li>Celery</li><li>Redis</li><li>PostgreSQL</li><li>pgvector</li><li>pytest</li></ul></section>
+<section class="case-section" id="version"><span class="section-title-index">02 / 데이터 처리</span><h2>새 버전이 준비된 뒤 검색 자료를 교체</h2><p>문서를 다시 처리할 때 기존 자료를 먼저 지우면, 새 처리가 실패한 동안 검색할 자료도 잃을 수 있습니다. 업로드 요청을 받는 단계와 새 버전을 검색에 반영하는 단계를 나눴습니다.</p>
+<figure class="process-diagram" aria-labelledby="nodease-version-title">
+  <figcaption id="nodease-version-title"><span class="diagram-label">문제 1 / 재처리 실패</span><strong>기존 자료를 먼저 지우지 않고, 마지막에 교체</strong></figcaption>
+  <ol class="diagram-pipeline three-steps">
+    <li><span class="step-number">1</span><strong>기존 버전으로 검색</strong><span>새 작업과 문서 버전을 따로 생성</span></li>
+    <li><span class="step-number">2</span><strong>새 검색 자료 준비</strong><span>기존 활성 자료는 그대로 유지</span></li>
+    <li class="step-emphasis"><span class="step-number">3</span><strong>최종 반영 검사</strong><span>버전을 잠근 뒤 현재 작업인지, 검색 자료가 있는지 확인</span></li>
+  </ol>
+  <p class="diagram-branch-label">처리와 검사 결과에 따라</p>
+  <ul class="diagram-branches three-branches">
+    <li class="branch-positive"><strong>새 자료 준비와 검사 완료</strong><span>새 버전을 활성화하고 이전 자료 정리를 별도 이벤트로 연결</span></li>
+    <li><strong>새 자료 처리 실패</strong><span>실패 상태를 기록하고 기존 활성 버전 유지</span></li>
+    <li class="branch-caution"><strong>이전 작업이 늦게 도착</strong><span>작업 식별값이 다르면 반영을 중단해 최신 결과 보호</span></li>
+  </ul>
+  <p class="diagram-takeaway">새 자료가 준비되기 전까지는 기존 버전으로 검색합니다. 처리에 실패해도 기존 검색 자료는 남습니다.</p>
+</figure>
+<h3>늦게 도착한 이전 작업의 결과 차단</h3><p>새 작업이 시작된 뒤 이전 작업의 결과가 늦게 도착할 수 있습니다. 문서 버전과 지식베이스를 잠근 뒤, 상태와 작업 식별값을 확인해 현재 작업의 결과만 반영했습니다. 검색에 쓸 문서 조각인 청크가 없는 버전도 반영을 중단합니다.</p>
+<pre class="code-block" aria-label="문서 버전 최종 반영의 핵심 코드"><code>version = self._lock_document_version(document_version.id)
+kb = self._lock_knowledge_base(version.knowledge_base_id)
+self._verify_fencing_token(version, expected_fencing_token)
+
+chunk_count = self._version_chunk_count(version.id)
+if chunk_count &lt;= 0:
+    raise KnowledgeIngestionFinalizationError("version_has_no_chunks")
+
+# 검사를 통과한 새 버전을 검색에 반영
+version.status = "ready"
+kb.active_document_version_id = version.id</code></pre><p class="code-caption">KnowledgeIngestionFinalizer에서 핵심 부분만 발췌했습니다. 전체 검증과 정리 작업은 아래 고정 코드 링크에서 확인할 수 있습니다.</p>
+</section>
+<section class="case-section" id="retrieval"><span class="section-title-index">03 / 검색 실행</span><h2>검색은 동시에 실행하고, 결과는 요청 순서대로</h2><p>서로 독립된 지식베이스를 하나씩 조회하면 검색마다 대기시간이 쌓입니다. 권한 검증을 통과한 검색을 최대 5개까지 동시에 실행하도록 바꿨습니다.</p><p>검색마다 읽기 전용 DB 세션을 따로 열었습니다. 결과는 완료 순서가 아니라 원래 조회 대상의 순서로 모아, 기존 출처와 인용의 정렬 규칙을 유지했습니다.</p>
+<figure class="process-diagram" aria-labelledby="nodease-search-title">
+  <figcaption id="nodease-search-title"><span class="diagram-label">문제 2 / 검색 대기 누적</span><strong>서로 독립된 검색을 최대 5개까지 함께 실행</strong></figcaption>
+  <div class="diagram-endpoint"><strong>권한 검증을 통과한 지식베이스 목록</strong><span>요청 순서를 함께 보관</span></div>
+  <div class="parallel-searches">
+    <p class="parallel-label">동시 실행 상한: 5개</p>
+    <ul class="parallel-slots" aria-label="동시에 실행할 수 있는 검색 5개"><li>검색 1</li><li>검색 2</li><li>검색 3</li><li>검색 4</li><li>검색 5</li></ul>
+    <p class="parallel-detail">각 검색은 독립된 읽기 전용 DB 세션을 사용합니다. 다음 검색은 빈자리가 생기면 실행합니다.</p>
+  </div>
+  <div class="diagram-endpoint step-emphasis"><strong>결과를 원래 요청 순서로 정리</strong><span>완료 순서가 달라도 출처와 인용 정렬 방식 유지</span></div>
+  <p class="diagram-takeaway">검색 대기를 줄이면서도 동시 실행 수, DB 세션과 반환 순서를 따로 관리했습니다.</p>
+</figure>
+<div class="comparison-panel"><h3>지식베이스 10개 조회의 중앙값</h3><div class="comparison-row"><span>순차 처리</span><span class="track"><span class="bar p100"></span></span><b>203.3ms</b></div><div class="comparison-row"><span>동시 처리</span><span class="track"><span class="bar green p209"></span></span><b>42.4ms</b></div></div>
+<div class="table-wrap"><table><caption class="sr-only">합성 지연을 둔 로컬 검색 비교</caption><thead><tr><th scope="col">지식베이스 수</th><th scope="col">순차 처리 중앙값</th><th scope="col">동시 처리 중앙값</th></tr></thead><tbody><tr><td>1개</td><td>20.3ms</td><td>21.0ms</td></tr><tr><td>2개</td><td>40.7ms</td><td>21.1ms</td></tr><tr><td>4개</td><td>81.5ms</td><td>21.4ms</td></tr><tr><td>10개</td><td>203.3ms</td><td class="metric">42.4ms</td></tr></tbody></table></div>
+<p class="small-note">PR #632의 과거 시험 기록입니다. 지식베이스마다 20ms의 합성 지연을 두고 로컬에서 20회 반복했습니다. 실제 DB, 임베딩 모델, 네트워크를 포함한 서비스 응답시간은 아닙니다. 1개 조회에서는 오히려 소폭 느려졌습니다.</p>
+<h3>동시 검색에서 함께 확인한 항목</h3><ul><li>한 번에 실행하는 검색 수를 제한했습니다.</li><li>사용자의 조직과 허용된 지식베이스 범위에서 조회하고, 검색별 DB 세션을 분리했습니다.</li><li>시간 초과와 취소에 따른 세션 정리를 처리하고, 오류 원문 대신 정해진 오류를 전달했습니다.</li></ul></section>
+<section class="case-section" id="hierarchical"><span class="section-title-index">04 / 비교 실험</span><h2>검색 방식과 평가 자료를 함께 점검</h2><p>계층형 검색을 먼저 적용한 뒤, 문서의 계층을 구분하지 않는 평면형 검색과 비교했습니다. 같은 원문과 청크, 임베딩, 권한, 상위 5개 조건을 맞춘 100문항 개발 실험에서 개선 폭은 작았습니다.</p>
+<div class="table-wrap"><table><caption class="sr-only">정답 근거 보정 전 검색 지표</caption><thead><tr><th scope="col">지표</th><th scope="col">평면형</th><th scope="col">계층형</th></tr></thead><tbody><tr><td>Recall@5</td><td>43.89%</td><td>45.00%</td></tr><tr><td>Hit@5</td><td>48.89%</td><td>50.00%</td></tr><tr><td>MRR@5</td><td>29.80%</td><td>30.02%</td></tr></tbody></table></div>
+<p class="small-note">상위 5개 결과에서 Recall@5는 필요한 근거를 얼마나 찾았는지, Hit@5는 정답 근거를 하나라도 찾았는지, MRR@5는 첫 정답 근거가 얼마나 앞에 나오는지를 나타냅니다.</p>
+<div class="callout warm"><strong>평가에 쓴 정답 근거도 다시 확인했습니다</strong><p>후속 AI 검토에서 31문항의 정답 근거를 수정해야 한다는 결과가 나왔습니다. 위 지표는 수정 전 평가 자료로 계산한 값입니다. 사람이 정답 근거를 검토하고, 수정한 평가 자료를 고정해 다시 비교하는 작업이 남아 있습니다.</p></div></section>
+<section class="case-section" id="sources"><span class="section-title-index">05 / 근거 자료</span><h2>구현과 검증 근거</h2><ul class="evidence-list">
+<li><a class="evidence-link" href="https://github.com/nodease/mbased" target="_blank" rel="noopener noreferrer"><span>Nodease 공개 저장소<small>팀 프로젝트의 전체 구조와 설명</small></span><span aria-hidden="true">↗</span></a></li>
+<li><a class="evidence-link" href="https://github.com/nodease/mbased/blob/457c8a631f9d3f6ef1cc27b5567c9b8617302c63/apps/shared/services/knowledge_ingestion_finalizer.py" target="_blank" rel="noopener noreferrer"><span>문서 버전 최종 반영 코드<small>고정 커밋의 KnowledgeIngestionFinalizer</small></span><span aria-hidden="true">↗</span></a></li>
+<li><a class="evidence-link" href="https://github.com/nodease/mbased/pull/632" target="_blank" rel="noopener noreferrer"><span>PR #632: 제한된 동시 검색과 비교 시험<small>당시 변경 내용, 시험 조건과 결과</small></span><span aria-hidden="true">↗</span></a></li>
+<li><a class="evidence-link" href="https://github.com/nodease/mbased/blob/9628e42c/docs/engineering/rag-flat-hierarchical-development-evaluation.md" target="_blank" rel="noopener noreferrer"><span>계층형 검색 비교와 평가 자료 검토<small>보정 전 지표와 정답 근거의 한계</small></span><span aria-hidden="true">↗</span></a></li>
+</ul><p class="small-note">문서 버전 처리 코드는 고정 커밋으로, 동시 검색과 계층형 검색 결과는 당시 PR과 비교 보고서로 연결했습니다. 설계와 구현, 테스트 작성에는 AI 코딩 도구를 사용했습니다.</p></section>
+      <nav class="case-bottom" aria-label="프로젝트 이동"><a href="../../index.html#projects">← 전체 프로젝트</a><a href="../storeops/">StoreOps 사례 →</a></nav>
+    </article>
+  </div>
+</main>
+
+<footer class="site-footer"><div class="container footer-inner">
+  <p>개발 포트폴리오 <span aria-hidden="true">/</span> 백엔드 및 AI 응용 개발</p>
+  <p>최종 수정 2026.11.04 <span aria-hidden="true"> · </span> <a href="../../index.html#approach">작성 방식과 AI 활용</a></p>
+</div></footer>
+</body>
+</html>

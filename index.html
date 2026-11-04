@@ -2,11 +2,92 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>개발 기록실</title>
+  <meta name="description" content="Nodease, StoreOps, 험비 교범 RAG에서 담당한 일과 구현 방식, 시험 조건을 함께 정리한 기술 포트폴리오입니다.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#ffffff">
+  <title>백엔드 및 AI 응용 개발 | 개발 포트폴리오</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/site.js" defer></script>
 </head>
 <body>
-  <h1>개발 기록실</h1>
-  <p>프로젝트와 학습 내용을 담을 포트폴리오를 준비중입니다.</p>
+<a class="skip-link" href="#main">본문으로 바로가기</a>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="index.html" aria-label="개발 포트폴리오 홈">개발 포트폴리오</a>
+    <button class="menu-toggle" data-menu-button aria-controls="site-navigation" aria-expanded="false" aria-label="메뉴 열기" hidden>메뉴 <span aria-hidden="true">☰</span></button>
+    <nav class="site-nav" id="site-navigation" data-navigation aria-label="주요 메뉴">
+      <a href="index.html#projects">프로젝트</a>
+      <a href="index.html#cases">문제 해결 사례</a>
+      <a href="index.html#learning">학습과 실험</a>
+      <a class="nav-external" href="https://github.com/HyungminYoon1" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+  </div>
+</header>
+<div class="container portfolio-shell">
+  <aside class="portfolio-index" aria-label="포트폴리오 목차">
+    <p class="index-caption">프로젝트 목록</p>
+    <ol class="project-index">
+      <li><a href="projects/nodease/"><span class="mono">01</span><span>Nodease<small>지식 통합과 검색</small></span></a></li>
+      <li><a href="projects/storeops/"><span class="mono">02</span><span>StoreOps<small>승인 기반 AI 실행</small></span></a></li>
+      <li><a href="projects/hmmwv/"><span class="mono">03</span><span>험비 교범 RAG<small>검색과 답변 평가</small></span></a></li>
+    </ol>
+    <div class="index-secondary"><a href="#cases">문제 해결 사례</a><a href="#learning">학습과 실험</a><a href="#approach">작성 방식</a></div>
+    <p class="index-note">각 사례에서 코드와<br>시험 기록을 확인할 수 있습니다.</p>
+  </aside>
+  <main id="main" class="portfolio-main">
+    <header class="portfolio-intro">
+      <p class="page-label">Python / Java</p>
+      <h1>백엔드 및 AI 응용 개발</h1>
+      <p>문서 검색, 승인 기반 AI 작업 실행, 교범 검색을 활용한 답변 평가를 다룬 프로젝트입니다.</p>
+    </header>
+    <section id="projects" class="projects-overview" aria-labelledby="projects-title">
+      <div class="section-head"><h2 id="projects-title">프로젝트</h2><span>3개 프로젝트</span></div>
+      <div class="project-columns" aria-hidden="true"><span>프로젝트와 담당 범위</span><span>구현한 내용</span><span>검증 결과</span></div>
+      <div class="project-register">
+        <article class="project-row" data-project="nodease">
+          <div class="project-identity"><span class="project-no mono">01</span><h3><a href="projects/nodease/" aria-label="Nodease 상세 보기">Nodease <span aria-hidden="true">↗</span></a></h3><p class="project-purpose">기업의 AI 업무 자동화와 사내 지식 통합 플랫폼</p><p class="project-ownership">5인 팀 / 지식 통합과 RAG 담당</p></div>
+          <div class="project-work"><h4>문서를 다시 처리하는 동안에도 기존 자료로 검색</h4><p>새 버전이 준비된 뒤 검색 대상을 교체했습니다. 여러 지식베이스의 검색은 최대 5개까지 동시에 실행했습니다.</p><p class="stack-line">Python, FastAPI, Celery, PostgreSQL</p></div>
+          <div class="project-proof"><span class="proof-label">10개 지식베이스 조회 중앙값</span><strong class="proof-value mono">203.3 <span>→</span> 42.4<small>ms</small></strong><p>각 검색에 합성 지연 20ms<br>로컬 20회 반복</p><a href="projects/nodease/#retrieval">비교 조건과 전체 결과 <span aria-hidden="true">→</span></a></div>
+        </article>
+        <article class="project-row" data-project="storeops">
+          <div class="project-identity"><span class="project-no mono">02</span><h3><a href="projects/storeops/" aria-label="StoreOps 상세 보기">StoreOps <span aria-hidden="true">↗</span></a></h3><p class="project-purpose">매장 운영 정보와 AI를 연결하는 플랫폼</p><p class="project-ownership">개인 프로젝트 / 합성 데이터</p></div>
+          <div class="project-work"><h4>AI의 제안과 실제 실행을 분리</h4><p>승인 시점에 권한과 버전을 다시 검사했습니다. 실행 여부가 불명확한 호출은 자동으로 재실행하지 않았습니다.</p><p class="stack-line">Java, Spring Boot, MCP, PostgreSQL</p></div>
+          <div class="project-proof"><span class="proof-label">같은 요청 식별값의 동시 요청</span><strong class="proof-value">32개 요청 <span>→</span> 초안 1건</strong><p>단일 프로세스 합성 도구<br>2026.08.20 검증 기록</p><a href="projects/storeops/#verification">시험 상황과 결과 <span aria-hidden="true">→</span></a></div>
+        </article>
+        <article class="project-row" data-project="hmmwv">
+          <div class="project-identity"><span class="project-no mono">03</span><h3><a href="projects/hmmwv/" aria-label="험비 교범 RAG 상세 보기">험비 교범 RAG <span aria-hidden="true">↗</span></a></h3><p class="project-purpose">공개 정비교범을 이용한 경량 모델 답변 비교 연구</p><p class="project-ownership">개인 연구 / 전처리부터 평가까지</p></div>
+          <div class="project-work"><h4>검색 근거가 답변에 미치는 효과 비교</h4><p>같은 모델로 검색 유무를 비교했습니다. 답변이 원문으로 뒷받침되는지와 필요한 내용을 모두 답했는지를 나눠 평가했습니다.</p><p class="stack-line">Qwen3-4B, BGE-M3, FAISS, Python</p></div>
+          <div class="project-proof"><span class="proof-label">근거 지지율: 단독 모델 → RAG</span><strong class="proof-value mono">24.5 <span>→</span> 86.3<small>%</small></strong><p>조건이 명확한 47문항<br>저장된 답변을 공통 기준으로 AI 검토</p><a href="projects/hmmwv/#results">평가 방법과 결과 <span aria-hidden="true">→</span></a></div>
+        </article>
+      </div>
+      <p class="overview-note">각 수치는 프로젝트별 시험 환경에서 측정한 결과입니다. 비교 방법과 측정 범위는 각 상세 페이지에 정리했습니다.</p>
+    </section>
+    <section id="cases" class="records-section" aria-labelledby="cases-title">
+      <div class="section-head"><h2 id="cases-title">문제 해결 사례</h2><span>상세 설명 바로가기</span></div>
+      <div class="records-list">
+        <a class="record-link" href="projects/nodease/#version"><span class="record-project">Nodease</span><span class="record-text"><strong>문서 재처리가 실패해도 기존 검색 유지</strong><span>새 버전 반영과 오래된 작업의 결과를 구분한 방법</span></span><span class="record-topic">비동기 처리</span><span aria-hidden="true">↗</span></a>
+        <a class="record-link" href="projects/nodease/#retrieval"><span class="record-project">Nodease</span><span class="record-text"><strong>검색은 동시에 실행하고 결과 순서는 유지</strong><span>동시 실행 수, 검색별 DB 세션과 반환 순서 관리</span></span><span class="record-topic">동시성과 성능</span><span aria-hidden="true">↗</span></a>
+        <a class="record-link" href="projects/storeops/#unknown"><span class="record-project">StoreOps</span><span class="record-text"><strong>실행 결과를 모를 때 자동 재실행 차단</strong><span>도구가 실행된 뒤 응답만 유실될 수 있는 상황에 대응</span></span><span class="record-topic">중복 실행 방지</span><span aria-hidden="true">↗</span></a>
+        <a class="record-link" href="projects/hmmwv/#evaluation"><span class="record-project">험비 교범 RAG</span><span class="record-text"><strong>근거가 맞아도 필요한 내용이 빠진 답변</strong><span>답한 내용의 타당성과 필수 내용 누락을 따로 확인</span></span><span class="record-topic">오류 분석</span><span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+    <section id="learning" class="records-section learning-records" aria-labelledby="learning-title">
+      <div class="section-head"><h2 id="learning-title">학습과 실험</h2><span>Java / Spring</span></div>
+      <p class="section-description">학습용 AI Helpdesk 프로젝트에서 문의 접수와 AI 처리 상태, 배포와 복구를 작은 사례로 나누어 공부했습니다.</p>
+      <ul class="reading-list">
+        <li><a href="https://github.com/HyungminYoon1/jungle-sw-ai-lab-advanced-wil/blob/7139179a717a740d665488a9160c58f30b7e8996/week7/wil.md" target="_blank" rel="noopener noreferrer"><span>JSON 형식 검사와 내용 평가를 나누어 확인하기</span><span class="reading-topic">AI 응답 검토 ↗</span></a></li>
+        <li><a href="https://github.com/HyungminYoon1/jungle-sw-ai-lab-advanced-wil/blob/7139179a717a740d665488a9160c58f30b7e8996/week8-9/wil.md" target="_blank" rel="noopener noreferrer"><span>이전 버전으로 되돌리기와 DB 복원 구분하기</span><span class="reading-topic">배포와 복구 ↗</span></a></li>
+        <li><a href="https://github.com/HyungminYoon1/ai-helpdesk-learning-lab" target="_blank" rel="noopener noreferrer"><span>학습용 구현 저장소</span><span class="reading-topic">코드 ↗</span></a></li>
+      </ul>
+    </section>
+    <section id="approach" class="writing-note" aria-labelledby="approach-title"><h2 id="approach-title">작성 방식과 AI 활용</h2><p>설계 초안, 코드, 테스트와 문서 작성에 AI 코딩 도구를 활용했습니다. 저는 요구사항과 처리 기준을 정리하고 실행 결과를 검토했습니다. 상세 페이지에는 담당 범위와 구현 방법, 시험 조건과 후속 과제를 적었습니다.</p></section>
+  </main>
+</div>
+
+<footer class="site-footer"><div class="container footer-inner"><p>개발 포트폴리오 / 백엔드 및 AI 응용 개발</p><p>최종 수정 2026.11.04 <span aria-hidden="true">—</span> <a href="index.html#approach">작성 방식과 AI 활용</a></p></div></footer>
 </body>
 </html>
