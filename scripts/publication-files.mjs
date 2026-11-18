@@ -10,6 +10,7 @@ export const repositoryFiles = Object.freeze([
   'scripts/build.mjs',
   'scripts/preview.mjs',
   'scripts/verify.mjs',
+  'scripts/verify-public-image.mjs',
   'scripts/audit-publication.mjs',
   '.github/workflows/pages.yml',
 ]);

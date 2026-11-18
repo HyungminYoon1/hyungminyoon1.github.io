@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { repositoryFiles } from './publication-files.mjs';
 import { publicFiles } from './public-files.mjs';
+import { verifyPublicImage } from './verify-public-image.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const decoder = new TextDecoder('utf-8', { fatal: true });
@@ -23,6 +24,10 @@ const rules = [
 ];
 
 function inspect(file, bytes) {
+  if (file.endsWith('assets/portrait.png')) {
+    verifyPublicImage(bytes);
+    return;
+  }
   const text = decoder.decode(bytes);
   for (const [rule, pattern] of rules) {
     const match = pattern.exec(text);

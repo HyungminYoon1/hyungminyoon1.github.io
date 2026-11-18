@@ -3,17 +3,24 @@ import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { publicFiles } from './public-files.mjs';
+import { verifyPublicImage } from './verify-public-image.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const allowed = new Set(publicFiles);
 const htmlFiles = publicFiles.filter(file => file.endsWith('.html'));
 const content = new Map();
+const buffers = new Map();
 const ids = new Map();
 const decoder = new TextDecoder('utf-8', { fatal: true });
 let localLinks = 0;
 let externalLinks = 0;
 for (const file of publicFiles) {
   const bytes = await readFile(path.join(root, file));
+  buffers.set(file, bytes);
+  if (file === 'assets/portrait.png') {
+    verifyPublicImage(bytes);
+    continue;
+  }
   assert(!(bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf), `UTF-8 BOM: ${file}`);
   const text = decoder.decode(bytes);
   assert(!text.includes('\uFFFD'), `Replacement character: ${file}`);
@@ -56,7 +63,7 @@ for (const file of htmlFiles) {
     const resolved = new URL(raw, `https://portfolio.invalid/${file}`);
     if (resolved.origin !== 'https://portfolio.invalid') {
       assert.equal(resolved.protocol, 'https:', `Non-HTTPS external reference: ${file}`);
-      assert.equal(resolved.hostname, 'github.com', `Unexpected external host: ${file}`);
+      assert(resolved.hostname === 'github.com' || resolved.href === 'https://hyungminyoon1.github.io/web-lab/', `Unexpected external destination: ${file}`);
       externalLinks += 1;
       continue;
     }
@@ -69,11 +76,11 @@ for (const file of htmlFiles) {
 }
 
 const home = content.get('index.html');
-assert(home.includes('<h1>백엔드 및 AI 응용 개발</h1>'));
+assert(home.includes('윤형민') && home.includes('서울사이버대학교 컴퓨터공학과'));
+assert(home.includes('src="assets/portrait.png"') && home.includes('alt="윤형민의 프로필 사진"'));
 assert.equal((home.match(/class="project-row"/g) || []).length, 3);
 for (const project of ['nodease', 'storeops', 'hmmwv']) assert(home.includes(`data-project="${project}"`));
 assert(!home.includes('data-project-filters'), 'The three-project overview must not hide content behind filters.');
-assert(!home.includes('class="hero"'), 'The home page should start with a compact factual introduction.');
 assert(home.includes('203.3') && home.includes('42.4') && home.includes('합성 지연'));
 assert(home.includes('AI 코딩 도구'));
 const nodease = content.get('projects/nodease/index.html');
@@ -107,7 +114,7 @@ async function listFiles(directory, prefix = '') {
 const builtFiles = await listFiles(path.join(root, 'dist'));
 assert.deepEqual(builtFiles.sort(), [...publicFiles].sort(), 'Build must contain exactly the selected public files.');
 for (const file of publicFiles) {
-  assert.equal(await readFile(path.join(root, 'dist', file), 'utf8'), content.get(file), `Stale build: ${file}`);
+  assert((await readFile(path.join(root, 'dist', file))).equals(buffers.get(file)), `Stale build: ${file}`);
 }
 
 const urlFlag = process.argv.find(arg => arg.startsWith('--url='));
@@ -118,7 +125,8 @@ if (urlFlag) {
   for (const file of publicFiles.filter(file => file !== '.nojekyll')) {
     const response = await fetch(new URL(file, base));
     assert.equal(response.status, 200, `HTTP response: ${file}`);
-    assert.equal(await response.text(), content.get(file), `HTTP content: ${file}`);
+    assert(Buffer.from(await response.arrayBuffer()).equals(buffers.get(file)), `HTTP content: ${file}`);
+    if (file.endsWith('.png')) assert(response.headers.get('content-type')?.startsWith('image/png'));
     httpChecks += 1;
   }
   for (const privatePath of ['.git/config', '.env', 'README.md', 'package.json', 'docs/evidence.md', '.local/', 'output/']) {

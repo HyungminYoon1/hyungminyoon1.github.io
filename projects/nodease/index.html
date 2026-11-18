@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="기업의 AI 업무 자동화와 지식 통합 플랫폼에서 문서 처리와 RAG를 맡았습니다. 새 문서를 준비하는 과정과 검색에 반영하는 시점을 나누고, 여러 지식베이스를 조회할 때의 반복 대기를 줄였습니다.">
   <meta name="robots" content="index, follow">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#f5f5f0">
   <title>Nodease | 개발 포트폴리오</title>
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../../assets/styles.css">
@@ -17,7 +17,7 @@
 <a class="skip-link" href="#main">본문으로 바로가기</a>
 <header class="site-header">
   <div class="container header-inner">
-    <a class="brand" href="../../index.html" aria-label="개발 포트폴리오 홈">개발 포트폴리오</a>
+    <a class="brand" href="../../index.html" aria-label="윤형민 포트폴리오 홈"><img class="brand-mark" src="../../assets/favicon.svg" width="44" height="44" alt=""><span>윤형민 <span class="brand-sub">PORTFOLIO</span></span></a>
     <button class="menu-toggle" data-menu-button aria-controls="site-navigation" aria-expanded="false" aria-label="메뉴 열기" hidden>메뉴 <span aria-hidden="true">☰</span></button>
     <nav class="site-nav" id="site-navigation" data-navigation aria-label="주요 메뉴">
       <a href="../../index.html#projects">프로젝트</a>
@@ -34,6 +34,7 @@
     <p class="case-kicker">Nodease / 5인 팀 프로젝트</p>
     <h1>문서 처리와 권한 기반 검색</h1>
     <p class="lead">Nodease의 지식 통합과 RAG 영역에서 문서 처리와 권한 기반 검색을 맡았습니다.</p>
+    <div class="repo-access"><a class="repo-link" href="https://github.com/nodease/mbased" target="_blank" rel="noopener noreferrer" aria-label="Nodease GitHub 저장소 (새 탭)">GitHub 저장소 <span aria-hidden="true">↗</span></a></div>
   </div>
   <dl class="case-meta"><div><dt>유형과 담당</dt><dd>5인 팀 프로젝트 / 지식 통합과 RAG</dd></div><div><dt>작업 기간</dt><dd>2026.06–07 팀 개발과 후속 개선</dd></div><div><dt>주요 기술</dt><dd>Python, FastAPI, Celery, Redis, PostgreSQL</dd></div></dl>
   <section class="case-brief" aria-label="핵심 요약"><dl><div><dt>문제</dt><dd>문서 재처리 중 기존 자료가 사라질 위험, 순차 검색의 대기시간 누적</dd></div><div><dt>구현</dt><dd>새 버전 준비 후 검색 대상 교체, 최대 5개 동시 검색, 검색별 읽기 전용 DB 세션</dd></div><div><dt>검증</dt><dd>10개 조회 중앙값 203.3ms → 42.4ms. 각 검색에 20ms 합성 지연을 둔 로컬 20회 시험.</dd></div></dl></section>
@@ -130,8 +131,8 @@ kb.active_document_version_id = version.id</code></pre><p class="code-caption">K
 </main>
 
 <footer class="site-footer"><div class="container footer-inner">
-  <p>개발 포트폴리오 <span aria-hidden="true">/</span> 백엔드 및 AI 응용 개발</p>
-  <p>최종 수정 2026.11.04 <span aria-hidden="true"> · </span> <a href="../../index.html#approach">작성 방식과 AI 활용</a></p>
+  <p>윤형민 · 개발 포트폴리오 <span aria-hidden="true">/</span> 백엔드 및 AI 응용 개발</p>
+  <p>최종 수정 2026.11.18 <span aria-hidden="true"> · </span> <a href="../../index.html#approach">AI 도구 사용</a></p>
 </div></footer>
 </body>
 </html>

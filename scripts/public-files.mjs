@@ -6,6 +6,7 @@ export const publicFiles = Object.freeze([
   'assets/styles.css',
   'assets/site.js',
   'assets/favicon.svg',
+  'assets/portrait.png',
   'evidence/storeops-summary.json',
   'robots.txt',
   '.nojekyll',
