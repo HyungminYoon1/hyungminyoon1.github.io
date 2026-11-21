@@ -3,15 +3,22 @@ import { createHash } from 'node:crypto';
 
 // Each entry identifies one visually reviewed, metadata-free derivative.
 const reviewed = new Map([
+  ['assets/flow-sculpture.webp', [1672, 941, 'cba5984d257ddb6474008cf3bd59e1bfa79692c7dff38de6c24e36aed112d832']],
+  ['assets/flow-sculpture-portrait.webp', [941, 1672, '994468ba2955804b80471010e45072d5f9e47d1aa964b98de91c02f2389124a1']],
   ['assets/portrait.png', [540, 720, '76bd8ac93e2f95356e683121187478f1ac57878e0edec45e1c14dbf23122efa0']],
-  ['assets/workbench.webp', [1672, 941, '0264b636df67ca483dbe1049277c44217c1ede0b12883075b5303c8007376ec7']],
-  ['assets/workbench-mobile.webp', [600, 941, '788012050e45fd5882c48dfe2451f891cdc272219abbadc5eeae5e009984b9a1']],
   ['assets/nodease-workflow.png', [1680, 953, '2d9a03fd32de39657d347768c97d492adce04d2a0beda63b4ab2f3e142abea36']],
   ['assets/storeops-approval.png', [1280, 780, 'e058f39a6a5a9e675bb1ffd2b4a234bdf5a6b83e44ee15b3907dbf5353f68571']],
   ['assets/hmmwv-vehicle.png', [818, 499, '6f826b7777d8678ba851cf147a4158a0695044b863f79a1531369e3656cfe22e']],
   ['assets/hmmwv-manual-cover.png', [918, 1188, '90b603ebaedecd7145e56e8c57e379f400f1fefd82ba6cc2b4a296172c169e1f']],
 ]);
 export const publicImagePaths = Object.freeze([...reviewed.keys()]);
+
+// These files occur only in earlier releases and retain their original digests.
+const retiredImages = new Map([
+  ['assets/workbench.webp', [1672, 941, '0264b636df67ca483dbe1049277c44217c1ede0b12883075b5303c8007376ec7']],
+  ['assets/workbench-mobile.webp', [600, 941, '788012050e45fd5882c48dfe2451f891cdc272219abbadc5eeae5e009984b9a1']],
+]);
+export const retiredImagePaths = Object.freeze([...retiredImages.keys()]);
 
 function checkPng(bytes) {
   assert(bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])), 'Invalid PNG');
@@ -44,9 +51,10 @@ function checkWebp(bytes) {
   return [bytes.readUInt16LE(26) & 0x3fff, bytes.readUInt16LE(28) & 0x3fff];
 }
 
-export function verifyPublicImage(file, bytes) {
-  assert(reviewed.has(file), 'Unreviewed image path');
-  const [width, height, digest] = reviewed.get(file);
+export function verifyPublicImage(file, bytes, historical = false) {
+  const approved = reviewed.get(file) ?? (historical && retiredImages.get(file));
+  assert(approved, 'Unreviewed image path');
+  const [width, height, digest] = approved;
   const size = file.endsWith('.webp') ? checkWebp(bytes) : checkPng(bytes);
   assert.deepEqual(size, [width, height], 'Unexpected pixel dimensions');
   assert.equal(createHash('sha256').update(bytes).digest('hex'), digest, 'Image differs from the reviewed asset');

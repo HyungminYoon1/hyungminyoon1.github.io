@@ -15,10 +15,32 @@ function destination(url) {
   return previous ? new URL(previous, url) : url;
 }
 
+let motionPaused = false;
+
+function setUpCover(main) {
+  const control = main.querySelector('.motion-control');
+  if (!control) return;
+
+  function showState() {
+    main.dataset.motion = motionPaused ? 'paused' : 'playing';
+    const label = motionPaused ? '배경 움직임 재생' : '배경 움직임 일시정지';
+    control.setAttribute('aria-label', label);
+    control.title = label;
+  }
+
+  control.addEventListener('click', () => {
+    motionPaused = !motionPaused;
+    showState();
+  });
+  showState();
+  control.hidden = false;
+}
+
 const initial = destination(new URL(location.href));
 if (initial.href !== location.href) {
   location.replace(initial);
 } else {
+  setUpCover(document.querySelector('main'));
   enableNavigation();
 }
 
@@ -85,6 +107,7 @@ function enableNavigation() {
         else link.removeAttribute('aria-current');
       }
       document.querySelector('main').replaceWith(main);
+      setUpCover(main);
       displayed = path;
       main.focus({ preventScroll: true });
       activateEntry(url, fromHistory);

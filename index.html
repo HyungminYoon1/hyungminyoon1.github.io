@@ -17,7 +17,7 @@
 <a class="skip-link" href="#main">본문으로 바로가기</a>
 <header class="site-header">
   <div class="container header-inner">
-    <a class="brand" href="/" aria-label="윤형민 포트폴리오 홈" aria-current="page"><img class="brand-mark" src="/assets/favicon.svg" width="40" height="40" alt=""><span>Portfolio</span></a>
+    <a class="brand" href="/" aria-label="윤형민 포트폴리오 홈" aria-current="page"><img class="brand-mark" src="/assets/favicon.svg" width="40" height="40" alt=""><span>윤형민</span></a>
     <nav class="site-nav" aria-label="주요 메뉴">
       <a href="/about/">소개</a>
       <a href="/projects/">프로젝트</a>
@@ -26,16 +26,26 @@
   </div>
 </header>
 <main id="main" class="cover" tabindex="-1">
+  <h1 class="sr-only">윤형민 개발 포트폴리오</h1>
   <div class="cover-scene">
-    <picture><source media="(max-width: 650px) and (max-aspect-ratio: 9/16)" srcset="/assets/workbench-mobile.webp"><img src="/assets/workbench.webp" width="1672" height="941" alt="펼친 참고서와 워크플로가 보이는 모니터가 놓인 작업대" fetchpriority="high" decoding="async"></picture>
-    <svg class="scene-light" viewBox="0 0 1672 941" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
-      <defs><radialGradient id="paper-light"><stop stop-color="#ffd59a" stop-opacity=".7"/><stop offset="1" stop-color="#ffd59a" stop-opacity="0"/></radialGradient></defs>
-      <ellipse class="paper-glow" cx="1220" cy="505" rx="290" ry="42" transform="rotate(-8 1220 505)" fill="url(#paper-light)"/>
-      <path class="trace-light" pathLength="1" d="M1381 36 C1436 34 1407 103 1449 104 L1544 109 C1575 109 1555 174 1606 174"/>
-      <circle class="signal-end" cx="1615" cy="174" r="4"/>
+    <picture>
+      <source media="(orientation: portrait)" srcset="/assets/flow-sculpture-portrait.webp">
+      <img src="/assets/flow-sculpture.webp" width="1672" height="941" alt="겹친 유리판 사이의 푸른 빛줄기가 한 점에 모였다가 세 갈래로 나뉘는 조형" fetchpriority="high" decoding="async">
+    </picture>
+    <svg class="flow-traces landscape-traces" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+      <path class="light-packet" pathLength="1" d="M486 941 C789 837 583 737 485 652 S506 468 692 420 Q795 388 875 380 C966 329 1004 209 1113 166 S1367 131 1542 185"/>
+      <path class="light-packet secondary" pathLength="1" d="M0 368 C148 379 246 518 436 497 S752 390 872 397 Q900 416 933 404 C1118 303 1248 304 1478 357"/>
+      <path class="light-packet warm" pathLength="1" d="M0 655 C182 613 283 539 447 512 S728 407 872 393 Q880 423 907 427 C1113 405 1209 492 1318 614"/>
+    </svg>
+    <svg class="flow-traces portrait-traces" viewBox="0 0 941 1672" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+      <path class="light-packet" pathLength="1" d="M44 319 C238 339 374 462 538 496 C826 561 496 633 385 687 C206 777 198 874 327 931 Q350 943 377 909 C544 702 642 700 803 787"/>
+      <path class="light-packet secondary" pathLength="1" d="M47 429 C220 402 395 494 550 521 C744 563 481 624 349 690 C151 785 114 893 305 942 Q340 980 402 952 C557 895 616 925 757 1008"/>
+      <path class="light-packet warm" pathLength="1" d="M165 627 C358 554 412 490 544 528 C671 582 449 624 317 700 C162 791 176 878 308 938 Q348 963 299 978 C79 1050 154 1183 355 1298"/>
     </svg>
   </div>
-  <h1 class="cover-name">윤형민</h1>
+  <button type="button" class="motion-control" aria-label="배경 움직임 일시정지" hidden>
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pause-icon" d="M6 4h4v16H6zm8 0h4v16h-4z"/><path class="play-icon" d="m7 3 14 9-14 9z"/></svg>
+  </button>
 </main>
 <footer class="site-footer"><div class="container footer-inner">
   <a href="/" aria-label="윤형민 포트폴리오 홈">윤형민</a>

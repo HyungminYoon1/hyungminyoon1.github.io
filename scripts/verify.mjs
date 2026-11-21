@@ -79,10 +79,14 @@ const home = content.get('index.html');
 const about = content.get('about/index.html');
 const projects = content.get('projects/index.html');
 const learning = content.get('learning/index.html');
-assert(home.includes('<h1 class="cover-name">윤형민</h1>'));
-assert(home.includes('src="/assets/workbench.webp"') && home.includes('srcset="/assets/workbench-mobile.webp"'));
+assert(home.includes('<h1 class="sr-only">윤형민 개발 포트폴리오</h1>'));
+assert(home.includes('<span>윤형민</span></a>') && home.includes('class="motion-control"'));
+assert(home.includes('src="/assets/flow-sculpture.webp"') && home.includes('srcset="/assets/flow-sculpture-portrait.webp"'));
 assert(!home.includes('portrait.png') && !home.includes('project-row') && !home.includes('reading-list'));
-assert(about.includes('서울사이버대학교 컴퓨터공학과') && about.includes('alt="윤형민의 프로필 사진"') && about.includes('AI 코딩 도구'));
+assert(/<img [^>]*alt="윤형민의 프로필 사진"[^>]*>\s*<figcaption[^>]*>서울사이버대학교 컴퓨터공학과 재학<\/figcaption>/.test(about));
+assert(about.includes('<h2 id="profile-title">안녕하세요. <span>백엔드 개발자 윤형민입니다.</span></h2>'));
+assert(about.includes('<p>AI로 문서를 찾고 반복 업무를 줄이는 도구를 만듭니다.</p>'));
+assert(about.includes('AI 코딩 도구'));
 assert(learning.includes('AI Helpdesk') && learning.includes('WEB LAB'));
 assert.equal((projects.match(/class="project-row"/g) || []).length, 3);
 for (const project of ['nodease', 'storeops', 'hmmwv']) {

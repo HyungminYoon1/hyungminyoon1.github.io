@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { repositoryFiles } from './publication-files.mjs';
 import { publicFiles } from './public-files.mjs';
-import { verifyPublicImage } from './verify-public-image.mjs';
+import { retiredImagePaths, verifyPublicImage } from './verify-public-image.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const decoder = new TextDecoder('utf-8', { fatal: true });
@@ -23,9 +23,9 @@ const rules = [
   ['literal-credential', /(?:password|passwd|secret|api[_-]?key|access[_-]?key)\s*["']?\s*[:=]\s*["'][^"'\s]{8,}["']/i],
 ];
 
-function inspect(file, bytes, location = file) {
+function inspect(file, bytes, location = file, historical = false) {
   if (/\.(?:png|webp)$/.test(file)) {
-    verifyPublicImage(file, bytes);
+    verifyPublicImage(file, bytes, historical);
     return;
   }
   const text = decoder.decode(bytes);
@@ -74,8 +74,8 @@ if (process.argv.includes('--history')) {
   for (const commit of git(['rev-list', '--all']).toString('utf8').trim().split('\n').filter(Boolean)) {
     const entries = git(['ls-tree', '-r', '--name-only', '-z', commit]).toString('utf8').split('\0').filter(Boolean);
     for (const file of entries) {
-      assert(repositoryFiles.includes(file), 'Historical file outside the publication list');
-      inspect(file, git(['show', `${commit}:${file}`]), `history:${commit.slice(0, 7)}:${file}`);
+      assert(repositoryFiles.includes(file) || retiredImagePaths.includes(file), 'Historical file outside the publication list');
+      inspect(file, git(['show', `${commit}:${file}`]), `history:${commit.slice(0, 7)}:${file}`, true);
       historyFiles += 1;
     }
   }
