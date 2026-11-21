@@ -30,18 +30,10 @@
   <div class="cover-scene">
     <picture>
       <source media="(orientation: portrait)" srcset="/assets/flow-sculpture-portrait.webp">
-      <img src="/assets/flow-sculpture.webp" width="1672" height="941" alt="겹친 유리판 사이의 푸른 빛줄기가 한 점에 모였다가 세 갈래로 나뉘는 조형" fetchpriority="high" decoding="async">
+      <img src="/assets/flow-sculpture.webp" width="1672" height="941" alt="겹친 유리판 사이의 푸른 빛줄기가 한 점에 모였다가 세 갈래로 나뉘는 조형" fetchpriority="high" decoding="async" draggable="false">
     </picture>
-    <svg class="flow-traces landscape-traces" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
-      <path class="light-packet" pathLength="1" d="M486 941 C789 837 583 737 485 652 S506 468 692 420 Q795 388 875 380 C966 329 1004 209 1113 166 S1367 131 1542 185"/>
-      <path class="light-packet secondary" pathLength="1" d="M0 368 C148 379 246 518 436 497 S752 390 872 397 Q900 416 933 404 C1118 303 1248 304 1478 357"/>
-      <path class="light-packet warm" pathLength="1" d="M0 655 C182 613 283 539 447 512 S728 407 872 393 Q880 423 907 427 C1113 405 1209 492 1318 614"/>
-    </svg>
-    <svg class="flow-traces portrait-traces" viewBox="0 0 941 1672" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
-      <path class="light-packet" pathLength="1" d="M44 319 C238 339 374 462 538 496 C826 561 496 633 385 687 C206 777 198 874 327 931 Q350 943 377 909 C544 702 642 700 803 787"/>
-      <path class="light-packet secondary" pathLength="1" d="M47 429 C220 402 395 494 550 521 C744 563 481 624 349 690 C151 785 114 893 305 942 Q340 980 402 952 C557 895 616 925 757 1008"/>
-      <path class="light-packet warm" pathLength="1" d="M165 627 C358 554 412 490 544 528 C671 582 449 624 317 700 C162 791 176 878 308 938 Q348 963 299 978 C79 1050 154 1183 355 1298"/>
-    </svg>
+    <canvas class="fiber-light" aria-hidden="true"></canvas>
+    <canvas class="gesture-light" aria-hidden="true"></canvas>
   </div>
   <button type="button" class="motion-control" aria-label="배경 움직임 일시정지" hidden>
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pause-icon" d="M6 4h4v16H6zm8 0h4v16h-4z"/><path class="play-icon" d="m7 3 14 9-14 9z"/></svg>

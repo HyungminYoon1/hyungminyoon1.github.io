@@ -3,6 +3,8 @@ import { createHash } from 'node:crypto';
 
 // Each entry identifies one visually reviewed, metadata-free derivative.
 const reviewed = new Map([
+  ['assets/fiber-wide.png', [1024, 624, '355e81565f57880c2a2cedbd57f803ec7049f359f3ca18233a576a3e554fc341']],
+  ['assets/fiber-tall.png', [1024, 448, '7a9bbebb1f14f96ed39fb9e564a179a4110ca3d09435435635676580838a7d6f']],
   ['assets/flow-sculpture.webp', [1672, 941, 'cba5984d257ddb6474008cf3bd59e1bfa79692c7dff38de6c24e36aed112d832']],
   ['assets/flow-sculpture-portrait.webp', [941, 1672, '994468ba2955804b80471010e45072d5f9e47d1aa964b98de91c02f2389124a1']],
   ['assets/portrait.png', [540, 720, '76bd8ac93e2f95356e683121187478f1ac57878e0edec45e1c14dbf23122efa0']],

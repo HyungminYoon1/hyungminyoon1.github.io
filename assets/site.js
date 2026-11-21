@@ -15,25 +15,37 @@ function destination(url) {
   return previous ? new URL(previous, url) : url;
 }
 
-let motionPaused = false;
+const coverPreference = { paused: false };
+let coverLifetime;
 
 function setUpCover(main) {
+  coverLifetime?.abort();
+  coverLifetime = undefined;
   const control = main.querySelector('.motion-control');
   if (!control) return;
+  const lifetime = new AbortController();
+  coverLifetime = lifetime;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  let session;
 
-  function showState() {
-    main.dataset.motion = motionPaused ? 'paused' : 'playing';
-    const label = motionPaused ? '배경 움직임 재생' : '배경 움직임 일시정지';
-    control.setAttribute('aria-label', label);
-    control.title = label;
+  async function applyPreference() {
+    session?.abort();
+    control.hidden = true;
+    main.removeAttribute('data-motion');
+    if (reduced.matches) return;
+    const current = new AbortController();
+    session = current;
+    try {
+      const { mountCover } = await import('/assets/cover-motion.js');
+      if (!current.signal.aborted) mountCover(main, current.signal, coverPreference);
+    } catch {
+      current.abort();
+    }
   }
 
-  control.addEventListener('click', () => {
-    motionPaused = !motionPaused;
-    showState();
-  });
-  showState();
-  control.hidden = false;
+  reduced.addEventListener('change', applyPreference, { signal: lifetime.signal });
+  lifetime.signal.addEventListener('abort', () => session?.abort(), { once: true });
+  applyPreference();
 }
 
 const initial = destination(new URL(location.href));

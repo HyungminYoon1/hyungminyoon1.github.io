@@ -82,6 +82,25 @@ const learning = content.get('learning/index.html');
 assert(home.includes('<h1 class="sr-only">윤형민 개발 포트폴리오</h1>'));
 assert(home.includes('<span>윤형민</span></a>') && home.includes('class="motion-control"'));
 assert(home.includes('src="/assets/flow-sculpture.webp"') && home.includes('srcset="/assets/flow-sculpture-portrait.webp"'));
+// A tile represents a short stretch of one fiber. Check the atlas and its
+// coordinate map together so that an image or layout edit cannot shift the light.
+for (const [shape, background] of [['wide', 'flow-sculpture'], ['tall', 'flow-sculpture-portrait']]) {
+  const scene = JSON.parse(content.get('assets/fiber-' + shape + '.json'));
+  const atlas = buffers.get('assets/fiber-' + shape + '.png');
+  const photo = buffers.get('assets/' + background + '.webp');
+  assert.deepEqual([scene.width, scene.height], [photo.readUInt16LE(26) & 0x3fff, photo.readUInt16LE(28) & 0x3fff]);
+  assert(scene.tile > scene.step && scene.step > 0 && scene.columns > 0);
+  const groups = new Set(scene.tracks.map(track => track.group));
+  for (const group of ['inlet', 'upper', 'middle', 'lower']) assert(groups.has(group));
+  let tiles = 0;
+  for (const { xy } of scene.tracks) {
+    assert(xy.length >= 4 && xy.length % 2 === 0);
+    assert(xy.every((v, i) => Number.isInteger(v) && v >= 0 && v < (i % 2 ? scene.height : scene.width)));
+    tiles += xy.length / 2;
+  }
+  assert.equal(atlas.readUInt32BE(16), scene.tile * scene.columns);
+  assert.equal(atlas.readUInt32BE(20), scene.tile * Math.ceil(tiles / scene.columns));
+}
 assert(!home.includes('portrait.png') && !home.includes('project-row') && !home.includes('reading-list'));
 assert(/<img [^>]*alt="윤형민의 프로필 사진"[^>]*>\s*<figcaption[^>]*>서울사이버대학교 컴퓨터공학과 재학<\/figcaption>/.test(about));
 assert(about.includes('<h2 id="profile-title">안녕하세요. <span>백엔드 개발자 윤형민입니다.</span></h2>'));
