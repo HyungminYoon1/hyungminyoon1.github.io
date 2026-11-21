@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="사내 업무를 자동화하는 Nodease, 매장 재주문을 돕는 StoreOps, 험비 교범으로 AI 답변을 비교한 연구입니다.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#10151e">
+  <title>프로젝트 | 개발 포트폴리오</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/site.js" defer></script>
+</head>
+<body data-view="projects">
+<a class="skip-link" href="#main">본문으로 바로가기</a>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="/" aria-label="윤형민 포트폴리오 홈"><img class="brand-mark" src="/assets/favicon.svg" width="40" height="40" alt=""><span>Portfolio</span></a>
+    <nav class="site-nav" aria-label="주요 메뉴">
+      <a href="/about/">소개</a>
+      <a href="/projects/" aria-current="page">프로젝트</a>
+      <a href="/learning/">학습 기록</a>
+    </nav>
+  </div>
+</header>
+<main class="container view-page" id="main" tabindex="-1">
+  <h1 class="view-title">프로젝트</h1>
+  <div class="project-register">
+        <article class="project-row" data-project="nodease">
+          <a class="project-summary" href="/projects/nodease/" aria-labelledby="nodease-name nodease-read">
+            <div class="project-preview"><img src="/assets/nodease-workflow.png" width="1680" height="953" alt="AI가 티켓을 분류하고 승인 여부에 따라 두 경로로 나뉘는 Nodease 편집 화면" loading="lazy" decoding="async"></div>
+            <div class="project-copy">
+              <h3 id="nodease-name">Nodease</h3>
+              <p class="project-purpose">사내 문서와 AI 모델을 연결하는 업무 자동화 도구</p>
+              <p class="project-description">팀원이 노드를 연결하고 단계마다 쓸 AI 모델을 고릅니다. 들어온 문의를 분류하고 사내 자료를 참고해 답변 초안을 쓰는 일을 한 흐름으로 만들 수 있습니다.</p>
+              <span class="project-read" id="nodease-read">프로젝트 읽기 <span aria-hidden="true">→</span></span>
+            </div>
+          </a>
+          <div class="project-source"><span class="project-role">5인 팀 프로젝트 · 문서 처리와 검색 담당</span><a class="repo-link" href="https://github.com/nodease/mbased" target="_blank" rel="noopener noreferrer" aria-label="Nodease GitHub 저장소 (새 탭)">GitHub 저장소 <span aria-hidden="true">↗</span></a></div>
+        </article>
+        <article class="project-row" data-project="storeops">
+          <a class="project-summary" href="/projects/storeops/" aria-labelledby="storeops-name storeops-read">
+            <div class="project-preview"><img src="/assets/storeops-approval.png" width="1280" height="780" alt="StoreOps에서 관리자가 재주문할 상품과 수량을 확인하고 초안을 승인하는 화면" loading="lazy" decoding="async"></div>
+            <div class="project-copy">
+              <h3 id="storeops-name">StoreOps</h3>
+              <p class="project-purpose">재고를 살펴보고 재주문을 준비하는 매장 운영 도구</p>
+              <p class="project-description">매장 담당자가 재고에 관해 물으면 AI가 재고 기록을 찾아 다음 조치를 제안합니다. 어떤 상품을 얼마나 다시 주문할지는 담당자가 확인하고 초안으로 남깁니다.</p>
+              <span class="project-read" id="storeops-read">프로젝트 읽기 <span aria-hidden="true">→</span></span>
+            </div>
+          </a>
+          <div class="project-source"><span class="project-role">개인 프로젝트 · 합성 매장 데이터</span><span class="repo-private">GitHub 저장소 비공개</span></div>
+        </article>
+        <article class="project-row" data-project="hmmwv">
+          <a class="project-summary" href="/projects/hmmwv/" aria-labelledby="hmmwv-name hmmwv-read">
+            <div class="project-preview"><img src="/assets/hmmwv-vehicle.png" width="818" height="499" alt="미 육군 행사장의 잔디밭에 있는 험비 차량" loading="lazy" decoding="async"></div>
+            <div class="project-copy">
+              <h3 id="hmmwv-name">험비 교범 RAG</h3>
+              <p class="project-purpose">작은 AI도 교범을 찾아 읽으면 더 잘 답할까?</p>
+              <p class="project-description">같은 모델에 같은 질문을 주고, 험비 정비교범을 검색할 수 있을 때와 없을 때의 답변을 비교했습니다. 원문에 근거한 설명이 얼마나 늘었는지, 필요한 내용을 빠뜨리지는 않았는지 살펴봤습니다.</p>
+              <span class="project-read" id="hmmwv-read">프로젝트 읽기 <span aria-hidden="true">→</span></span>
+            </div>
+          </a>
+          <div class="project-source"><span class="project-role">개인 연구 · 문서 검색과 답변 비교</span><a class="repo-link" href="https://github.com/HyungminYoon1/hmmwv-rag-experiment" target="_blank" rel="noopener noreferrer" aria-label="험비 교범 RAG GitHub 저장소 (새 탭)">GitHub 저장소 <span aria-hidden="true">↗</span></a></div>
+        </article>
+      </div>
+</main>
+<footer class="site-footer"><div class="container footer-inner">
+  <a href="/" aria-label="윤형민 포트폴리오 홈">윤형민</a>
+  <div><a href="/about/#approach">AI 도구 사용</a><a href="https://github.com/HyungminYoon1" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="https://hyungminyoon1.github.io/web-lab/" target="_blank" rel="noopener noreferrer">WEB LAB ↗</a></div>
+</div></footer>
+</body>
+</html>

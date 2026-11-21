@@ -1,30 +1,115 @@
-document.documentElement.classList.add('js-ready');
-const menuButton = document.querySelector('[data-menu-button]');
-const navigation = document.querySelector('[data-navigation]');
+// Each view is also an ordinary static page for direct visits and links.
+const routes = new Set(['/', '/about/', '/projects/', '/learning/', '/projects/nodease/', '/projects/storeops/', '/projects/hmmwv/']);
+const previousSections = new Map([
+  ['#intro', '/about/'], ['#projects', '/projects/'], ['#cases', '/projects/'],
+  ['#learning', '/learning/'], ['#approach', '/about/#approach'],
+]);
 
-function closeMenu() {
-  if (!menuButton || !navigation) return;
-  menuButton.setAttribute('aria-expanded', 'false');
-  menuButton.setAttribute('aria-label', '메뉴 열기');
-  navigation.classList.remove('is-open');
+function pagePath(pathname) {
+  return pathname.replace(/\/index\.html$/, '/');
 }
 
-if (menuButton && navigation) {
-  menuButton.hidden = false;
-  menuButton.addEventListener('click', () => {
-    const expanded = menuButton.getAttribute('aria-expanded') !== 'true';
-    menuButton.setAttribute('aria-expanded', String(expanded));
-    menuButton.setAttribute('aria-label', expanded ? '메뉴 닫기' : '메뉴 열기');
-    navigation.classList.toggle('is-open', expanded);
-  });
-  navigation.addEventListener('click', (event) => {
-    if (event.target.closest('a')) closeMenu();
-  });
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && menuButton.getAttribute('aria-expanded') === 'true') {
-      closeMenu();
-      menuButton.focus();
+function destination(url) {
+  const path = pagePath(url.pathname);
+  const previous = path === '/' && previousSections.get(url.hash);
+  return previous ? new URL(previous, url) : url;
+}
+
+const initial = destination(new URL(location.href));
+if (initial.href !== location.href) {
+  location.replace(initial);
+} else {
+  enableNavigation();
+}
+
+function enableNavigation() {
+  let displayed = pagePath(location.pathname);
+  let pending;
+  const positions = new Map();
+  let sequence = 0;
+  let entry = currentEntry();
+  history.scrollRestoration = 'manual';
+
+  function currentEntry() {
+    if (!history.state?.portfolioEntry) {
+      history.replaceState({ ...history.state, portfolioEntry: performance.timeOrigin + '/' + (++sequence) }, '');
     }
+    return history.state.portfolioEntry;
+  }
+
+  function activateEntry(url, fromHistory) {
+    if (!fromHistory && url.href !== location.href) history.pushState(null, '', url);
+    entry = currentEntry();
+    const anchor = document.getElementById(url.hash.slice(1));
+    if (fromHistory && positions.has(entry)) {
+      window.scrollTo({ top: positions.get(entry), behavior: 'instant' });
+    } else if (anchor) {
+      if (anchor.hasAttribute('tabindex')) anchor.focus({ preventScroll: true });
+      anchor.scrollIntoView({ behavior: 'instant' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }
+
+  async function navigate(url, fromHistory) {
+    pending?.abort();
+    const path = pagePath(url.pathname);
+    positions.set(entry, window.scrollY);
+    if (displayed === path) {
+      activateEntry(url, fromHistory);
+      return;
+    }
+
+    const request = new AbortController();
+    pending = request;
+    try {
+      const response = await fetch(path, {
+        signal: request.signal, mode: 'same-origin', credentials: 'omit', redirect: 'error',
+      });
+      if (!response.ok || !response.headers.get('content-type')?.includes('text/html')) {
+        throw new Error('Unavailable portfolio page');
+      }
+      const next = new DOMParser().parseFromString(await response.text(), 'text/html');
+      const main = next.querySelector('main#main');
+      if (!main || !next.body.dataset.view) throw new Error('Missing portfolio content');
+      if (request.signal.aborted) return;
+
+      document.title = next.title;
+      document.querySelector('meta[name="description"]').content = next.querySelector('meta[name="description"]').content;
+      document.body.dataset.view = next.body.dataset.view;
+      if (next.body.dataset.project) document.body.dataset.project = next.body.dataset.project;
+      else delete document.body.dataset.project;
+      for (const link of document.querySelectorAll('.site-header a')) {
+        const current = next.querySelector('.site-header a[href="' + link.getAttribute('href') + '"]')?.getAttribute('aria-current');
+        if (current) link.setAttribute('aria-current', current);
+        else link.removeAttribute('aria-current');
+      }
+      document.querySelector('main').replaceWith(main);
+      displayed = path;
+      main.focus({ preventScroll: true });
+      activateEntry(url, fromHistory);
+    } catch {
+      if (!request.signal.aborted) {
+        if (fromHistory) location.reload();
+        else location.assign(url);
+      }
+    }
+  }
+
+  document.addEventListener('click', event => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const link = event.target.closest('a[href]');
+    if (!link || link.target || link.hasAttribute('download') || link.origin !== location.origin) return;
+    const url = destination(new URL(link.href));
+    const path = pagePath(url.pathname);
+    if (url.search || !routes.has(path)) return;
+    event.preventDefault();
+    navigate(url, false);
   });
-  matchMedia('(min-width: 761px)').addEventListener('change', closeMenu);
+
+  window.addEventListener('popstate', () => {
+    const url = destination(new URL(location.href));
+    if (url.href !== location.href) history.replaceState(history.state, '', url);
+    navigate(url, true);
+  });
 }

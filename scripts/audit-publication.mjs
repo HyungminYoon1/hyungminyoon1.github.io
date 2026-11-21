@@ -23,15 +23,15 @@ const rules = [
   ['literal-credential', /(?:password|passwd|secret|api[_-]?key|access[_-]?key)\s*["']?\s*[:=]\s*["'][^"'\s]{8,}["']/i],
 ];
 
-function inspect(file, bytes) {
-  if (file.endsWith('assets/portrait.png')) {
-    verifyPublicImage(bytes);
+function inspect(file, bytes, location = file) {
+  if (/\.(?:png|webp)$/.test(file)) {
+    verifyPublicImage(file, bytes);
     return;
   }
   const text = decoder.decode(bytes);
   for (const [rule, pattern] of rules) {
     const match = pattern.exec(text);
-    if (match) findings.push({ file, rule, line: text.slice(0, match.index).split('\n').length });
+    if (match) findings.push({ file: location, rule, line: text.slice(0, match.index).split('\n').length });
   }
   // Findings deliberately contain locations and categories, never matched values.
 }
@@ -62,12 +62,12 @@ const tracked = git(['ls-files', '-z']).toString('utf8').split('\0').filter(Bool
 assert(tracked.every(file => repositoryFiles.includes(file)), 'Tracked file outside the approved publication list');
 if (process.argv.includes('--staged')) {
   assert.deepEqual([...tracked].sort(), [...repositoryFiles].sort(), 'Staged publication list differs from the reviewed list');
-  for (const file of tracked) inspect(`index:${file}`, git(['show', `:${file}`]));
+  for (const file of tracked) inspect(file, git(['show', `:${file}`]), `index:${file}`);
 }
 
 const deployedFiles = await filesIn(path.join(root, 'dist'));
 assert.deepEqual(deployedFiles.sort(), [...publicFiles].sort(), 'Deployment artifact contains unexpected files');
-for (const file of publicFiles) inspect(`dist:${file}`, await readFile(path.join(root, 'dist', file)));
+for (const file of publicFiles) inspect(file, await readFile(path.join(root, 'dist', file)), `dist:${file}`);
 
 let historyFiles = 0;
 if (process.argv.includes('--history')) {
@@ -75,7 +75,7 @@ if (process.argv.includes('--history')) {
     const entries = git(['ls-tree', '-r', '--name-only', '-z', commit]).toString('utf8').split('\0').filter(Boolean);
     for (const file of entries) {
       assert(repositoryFiles.includes(file), 'Historical file outside the publication list');
-      inspect(`history:${commit.slice(0, 7)}:${file}`, git(['show', `${commit}:${file}`]));
+      inspect(file, git(['show', `${commit}:${file}`]), `history:${commit.slice(0, 7)}:${file}`);
       historyFiles += 1;
     }
   }

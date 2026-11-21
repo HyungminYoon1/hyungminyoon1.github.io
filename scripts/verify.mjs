@@ -17,8 +17,8 @@ let externalLinks = 0;
 for (const file of publicFiles) {
   const bytes = await readFile(path.join(root, file));
   buffers.set(file, bytes);
-  if (file === 'assets/portrait.png') {
-    verifyPublicImage(bytes);
+  if (/\.(?:png|webp)$/.test(file)) {
+    verifyPublicImage(file, bytes);
     continue;
   }
   assert(!(bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf), `UTF-8 BOM: ${file}`);
@@ -40,7 +40,7 @@ for (const file of publicFiles) {
   assert(!text.includes('프로젝트의 전체 테스트를 다시 실행한 것은 아닙니다'), `Authoring note in public project copy: ${file}`);
   assert(/<title>[^<]+ \| 개발 포트폴리오<\/title>/.test(text), `Unexpected site title: ${file}`);
   const navigation = text.match(/<nav\b[\s\S]*?<\/nav>/)?.[0] || '';
-  for (const label of ['프로젝트', '문제 해결 사례', '학습과 실험']) {
+  for (const label of ['소개', '프로젝트', '학습 기록']) {
     assert(navigation.includes(`>${label}</a>`), `Missing navigation label ${label}: ${file}`);
   }
   assert.equal((text.match(/<h1\b/g) || []).length, 1, `Expected one main heading: ${file}`);
@@ -57,13 +57,13 @@ for (const file of publicFiles) {
   }
 }
 for (const file of htmlFiles) {
-  for (const match of content.get(file).matchAll(/\b(?:href|src)="([^"]+)"/g)) {
+  for (const match of content.get(file).matchAll(/\b(?:href|src|srcset)="([^"]+)"/g)) {
     const raw = match[1];
     assert(!raw.startsWith('javascript:'), `Unsafe link: ${file}`);
     const resolved = new URL(raw, `https://portfolio.invalid/${file}`);
     if (resolved.origin !== 'https://portfolio.invalid') {
       assert.equal(resolved.protocol, 'https:', `Non-HTTPS external reference: ${file}`);
-      assert(resolved.hostname === 'github.com' || resolved.href === 'https://hyungminyoon1.github.io/web-lab/', `Unexpected external destination: ${file}`);
+      assert(resolved.hostname === 'github.com' || ['https://hyungminyoon1.github.io/web-lab/', 'https://www.dvidshub.net/image/6823052/humvee'].includes(resolved.href), `Unexpected external destination: ${file}`);
       externalLinks += 1;
       continue;
     }
@@ -76,13 +76,22 @@ for (const file of htmlFiles) {
 }
 
 const home = content.get('index.html');
-assert(home.includes('윤형민') && home.includes('서울사이버대학교 컴퓨터공학과'));
-assert(home.includes('src="assets/portrait.png"') && home.includes('alt="윤형민의 프로필 사진"'));
-assert.equal((home.match(/class="project-row"/g) || []).length, 3);
-for (const project of ['nodease', 'storeops', 'hmmwv']) assert(home.includes(`data-project="${project}"`));
-assert(!home.includes('data-project-filters'), 'The three-project overview must not hide content behind filters.');
-assert(home.includes('203.3') && home.includes('42.4') && home.includes('합성 지연'));
-assert(home.includes('AI 코딩 도구'));
+const about = content.get('about/index.html');
+const projects = content.get('projects/index.html');
+const learning = content.get('learning/index.html');
+assert(home.includes('<h1 class="cover-name">윤형민</h1>'));
+assert(home.includes('src="/assets/workbench.webp"') && home.includes('srcset="/assets/workbench-mobile.webp"'));
+assert(!home.includes('portrait.png') && !home.includes('project-row') && !home.includes('reading-list'));
+assert(about.includes('서울사이버대학교 컴퓨터공학과') && about.includes('alt="윤형민의 프로필 사진"') && about.includes('AI 코딩 도구'));
+assert(learning.includes('AI Helpdesk') && learning.includes('WEB LAB'));
+assert.equal((projects.match(/class="project-row"/g) || []).length, 3);
+for (const project of ['nodease', 'storeops', 'hmmwv']) {
+  const card = projects.match(new RegExp('<article class="project-row" data-project="' + project + '">([\\s\\S]*?)</article>'))?.[1];
+  const link = card?.match(/<a class="project-summary"[^>]*>([\s\S]*?)<\/a>/)?.[0];
+  assert(link?.includes(`href="/projects/${project}/"`) && link.includes('<img ') && link.includes('class="project-description"'), `Image and description must open ${project}`);
+  assert(project === 'storeops' ? card.includes('GitHub 저장소 비공개') && !card.includes('https://github.com/') : card.includes('https://github.com/'));
+}
+assert(!['203.3', '42.4', '24.5%', '86.3%', '32개'].some(value => projects.includes(value)), 'Keep test results in the case studies');
 const nodease = content.get('projects/nodease/index.html');
 assert.equal((nodease.match(/<figure class="process-diagram"/g) || []).length, 3);
 for (const caption of ['nodease-structure-title', 'nodease-version-title', 'nodease-search-title']) assert(nodease.includes(`id="${caption}"`));
@@ -126,7 +135,7 @@ if (urlFlag) {
     const response = await fetch(new URL(file, base));
     assert.equal(response.status, 200, `HTTP response: ${file}`);
     assert(Buffer.from(await response.arrayBuffer()).equals(buffers.get(file)), `HTTP content: ${file}`);
-    if (file.endsWith('.png')) assert(response.headers.get('content-type')?.startsWith('image/png'));
+    if (/\.(?:png|webp)$/.test(file)) assert(response.headers.get('content-type')?.startsWith('image/' + file.split('.').pop()));
     httpChecks += 1;
   }
   for (const privatePath of ['.git/config', '.env', 'README.md', 'package.json', 'docs/evidence.md', '.local/', 'output/']) {
