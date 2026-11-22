@@ -53,7 +53,43 @@ body[data-view="cover"] .site-footer { display: none; }
 }
 main:focus { outline: none; }
 .view-page { min-height: 71vh; padding-block: clamp(46px, 7vw, 92px) 60px; }
-.view-title { font-size: clamp(40px, 5.8vw, 70px); font-weight: 650; letter-spacing: -.075em; line-height: 1.15; margin: 0 0 clamp(28px, 4vw, 54px); }
+.view-title {
+  --fiber-width: 58cqi;
+  --fiber-height: 112px;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  container-type: inline-size;
+  grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+  overflow-wrap: anywhere;
+  column-gap: 12px;
+  padding-block: 18px 20px;
+  font-size: clamp(40px, 5.8vw, 70px);
+  font-weight: 650;
+  letter-spacing: -.075em;
+  line-height: 1.15;
+  margin: 0 0 clamp(28px, 4vw, 54px);
+}
+.view-title::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  inset: -24px 0 -14px 20%;
+  background: radial-gradient(ellipse 41% 47% at 58% 52%, rgb(213 230 247 / .86), transparent 100%);
+}
+.title-fibers {
+  grid-column: 2 / 3;
+  position: absolute;
+  inset-inline-end: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(100%, var(--fiber-width));
+  height: var(--fiber-height);
+  pointer-events: none;
+  user-select: none;
+}
+.title-fibers img { display: block; width: 100%; height: 100%; }
 .about-profile { display: grid; grid-template-columns: minmax(150px, 260px) minmax(0, 580px); align-items: center; gap: clamp(28px, 6vw, 80px); }
 .profile-photo { margin: 0; }
 .profile-photo figcaption { margin-top: 8px; color: var(--muted); font-size: 14px; line-height: 1.6; word-break: keep-all; }
@@ -316,6 +352,14 @@ td.metric { color: #315d94; font-family: Consolas, monospace; font-size: 14px; f
   .code-block { font-size: 11px; padding: 16px; }.callout { padding: 15px; }.callout p { font-size: 12px; }
   .comparison-row { grid-template-columns: 64px minmax(0,1fr) 65px; gap: 12px; font-size: 11px; }.comparison-row b { font-size: 12px; }
   .evidence-link { font-size: 12px; }.case-bottom { font-size: 12px; }
+}
+@media (max-width: 650px) {
+  .view-title { --fiber-width: 43cqi; --fiber-height: 76px; padding-block: 12px; }
+  .view-title::before { inset: -8px 0 -8px 39%; }
+}
+@media print, (forced-colors: active) {
+  .view-title { display: block; padding-block: 0; }
+  .view-title::before, .title-fibers { display: none; }
 }
 @media (max-width: 380px) {
   .lab-link { padding: 18px; gap: 12px; }.lab-link strong { font-size: 14px; }

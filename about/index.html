@@ -26,7 +26,12 @@
   </div>
 </header>
 <main class="container view-page" id="main" tabindex="-1">
-  <h1 class="view-title">소개</h1>
+  <h1 class="view-title">소개
+    <picture class="title-fibers" aria-hidden="true">
+      <source media="(max-width: 650px)" srcset="/assets/title-about-mobile.png" width="454" height="228">
+      <img src="/assets/title-about.png" width="1184" height="224" alt="">
+    </picture>
+  </h1>
   <section class="about-profile" aria-labelledby="profile-title">
     <figure class="profile-photo" aria-labelledby="profile-caption">
       <img src="/assets/portrait.png" width="540" height="720" alt="윤형민의 프로필 사진">

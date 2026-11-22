@@ -3,6 +3,12 @@ import { createHash } from 'node:crypto';
 
 // Each entry identifies one visually reviewed, metadata-free derivative.
 const reviewed = new Map([
+  ['assets/title-about.png', [1184, 224, 'ebd8232aa925726f392c25713c6599d14e848c46eb10f1a814d67e2048c68e15']],
+  ['assets/title-about-mobile.png', [454, 228, '4bf47990375ed28bf4f8da90b5615fb965304f05b77f3d655cb54d291ecd943e']],
+  ['assets/title-projects.png', [1184, 224, '04c3f82c96072264e92240b1f3710d5f43c2b6fba89ee265a785b65d26abd2fe']],
+  ['assets/title-projects-mobile.png', [454, 228, '83c5dad1323199510cd7f85a0d7b95f0511a443cfacf60bb540b04572a2b8640']],
+  ['assets/title-learning.png', [1184, 224, 'd3d278232d3f371f0997921162c0759b2bc8c977f71cc3ded575faae99d17259']],
+  ['assets/title-learning-mobile.png', [454, 228, 'e0e6b0867c7900e1ca65dfaf212bd535bb467a5751683a84fc09d56e78e1ee1a']],
   ['assets/fiber-wide.png', [1024, 624, '355e81565f57880c2a2cedbd57f803ec7049f359f3ca18233a576a3e554fc341']],
   ['assets/fiber-tall.png', [1024, 448, '7a9bbebb1f14f96ed39fb9e564a179a4110ca3d09435435635676580838a7d6f']],
   ['assets/flow-sculpture.webp', [1672, 941, 'cba5984d257ddb6474008cf3bd59e1bfa79692c7dff38de6c24e36aed112d832']],
