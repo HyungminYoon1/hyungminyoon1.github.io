@@ -113,6 +113,29 @@ for (const project of ['nodease', 'storeops', 'hmmwv']) {
   const link = card?.match(/<a class="project-summary"[^>]*>([\s\S]*?)<\/a>/)?.[0];
   assert(link?.includes(`href="/projects/${project}/"`) && link.includes('<img ') && link.includes('class="project-description"'), `Image and description must open ${project}`);
   assert(project === 'storeops' ? card.includes('GitHub 저장소 비공개') && !card.includes('https://github.com/') : card.includes('https://github.com/'));
+
+  // Link crawlers read the initial HTML, including image URLs carried in content attributes.
+  const head = content.get('projects/' + project + '/index.html').split('</head>')[0];
+  const preview = new Map();
+  for (const [, key, value] of head.matchAll(/<meta property="(og:[\w:]+)" content="([^"]*)"/g)) {
+    assert(!preview.has(key), 'Duplicate ' + key + ' in ' + project);
+    preview.set(key, value);
+  }
+  for (const key of ['og:title', 'og:description', 'og:image:alt']) {
+    assert(preview.get(key)?.trim(), 'Missing ' + key + ' in ' + project);
+  }
+  const pageUrl = new URL('/projects/' + project + '/', 'https://hyungminyoon1.github.io');
+  const imageTag = link.match(/<img\b[^>]+>/)[0];
+  const image = {};
+  for (const [, name, value] of imageTag.matchAll(/\b(src|width|height)="([^"]+)"/g)) {
+    image[name] = value;
+  }
+  assert.equal(preview.get('og:type'), 'article');
+  assert.equal(preview.get('og:url'), pageUrl.href);
+  assert.equal(preview.get('og:image'), new URL(image.src, pageUrl).href);
+  assert.equal(preview.get('og:image:type'), 'image/' + path.extname(image.src).slice(1));
+  assert.equal(preview.get('og:image:width'), image.width);
+  assert.equal(preview.get('og:image:height'), image.height);
 }
 assert(!['203.3', '42.4', '24.5%', '86.3%', '32개'].some(value => projects.includes(value)), 'Keep test results in the case studies');
 const nodease = content.get('projects/nodease/index.html');

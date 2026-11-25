@@ -109,7 +109,9 @@ function enableNavigation() {
       if (request.signal.aborted) return;
 
       document.title = next.title;
-      document.querySelector('meta[name="description"]').content = next.querySelector('meta[name="description"]').content;
+      const pageMetadata = 'meta[name="description"], meta[property^="og:"]';
+      for (const tag of document.head.querySelectorAll(pageMetadata)) tag.remove();
+      document.head.append(...next.head.querySelectorAll(pageMetadata));
       document.body.dataset.view = next.body.dataset.view;
       if (next.body.dataset.project) document.body.dataset.project = next.body.dataset.project;
       else delete document.body.dataset.project;
