@@ -79,7 +79,11 @@ const home = content.get('index.html');
 const about = content.get('about/index.html');
 const projects = content.get('projects/index.html');
 const learning = content.get('learning/index.html');
-assert(home.includes('<h1 class="sr-only">윤형민 개발 포트폴리오</h1>'));
+assert(home.includes('<h1 class="cover-title"><span class="sr-only">윤형민의 </span>프로젝트와 개발 기록</h1>'));
+const coverNav = home.match(/<nav\b[^>]*aria-label="대표 프로젝트"[^>]*>([\s\S]*?)<\/nav>/)?.[1];
+assert(coverNav, 'Missing featured-project navigation on the cover');
+const coverLinks = [...coverNav.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)];
+assert.deepEqual(coverLinks.map(match => match[1]), ['/projects/nodease/', '/projects/storeops/', '/projects/hmmwv/']);
 assert(home.includes('<span>윤형민</span></a>') && home.includes('class="motion-control"'));
 assert(home.includes('src="/assets/flow-sculpture.webp"') && home.includes('srcset="/assets/flow-sculpture-portrait.webp"'));
 // A tile represents a short stretch of one fiber. Check the atlas and its
@@ -130,6 +134,9 @@ for (const project of ['nodease', 'storeops', 'hmmwv']) {
   for (const [, name, value] of imageTag.matchAll(/\b(src|width|height)="([^"]+)"/g)) {
     image[name] = value;
   }
+  const coverLink = coverLinks.find(match => match[1] === pageUrl.pathname);
+  const thumbnail = image.src.replace(/\.png$/, '-thumb.webp');
+  assert(coverLink?.[2].includes('src="' + thumbnail + '"'), 'Missing cover thumbnail for ' + project);
   assert.equal(preview.get('og:type'), 'article');
   assert.equal(preview.get('og:url'), pageUrl.href);
   assert.equal(preview.get('og:image'), new URL(image.src, pageUrl).href);

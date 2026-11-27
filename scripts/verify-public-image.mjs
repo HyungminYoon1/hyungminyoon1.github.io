@@ -15,8 +15,11 @@ const reviewed = new Map([
   ['assets/flow-sculpture-portrait.webp', [941, 1672, '994468ba2955804b80471010e45072d5f9e47d1aa964b98de91c02f2389124a1']],
   ['assets/portrait.png', [540, 720, '76bd8ac93e2f95356e683121187478f1ac57878e0edec45e1c14dbf23122efa0']],
   ['assets/nodease-workflow.png', [1680, 953, '2d9a03fd32de39657d347768c97d492adce04d2a0beda63b4ab2f3e142abea36']],
+  ['assets/nodease-workflow-thumb.webp', [480, 273, 'b9835b34c8989871c55cdc4c51491b9724e24370f2337c1847e3b6aad485fcad']],
   ['assets/storeops-approval.png', [1280, 780, 'e058f39a6a5a9e675bb1ffd2b4a234bdf5a6b83e44ee15b3907dbf5353f68571']],
+  ['assets/storeops-approval-thumb.webp', [480, 293, 'a225bab27dc4fb8e213433678b93dca3228c93517299a9a6bd2310f8222c4ce9']],
   ['assets/hmmwv-vehicle.png', [818, 499, '6f826b7777d8678ba851cf147a4158a0695044b863f79a1531369e3656cfe22e']],
+  ['assets/hmmwv-vehicle-thumb.webp', [480, 293, '4ea83734441530cd104b3699aed9c82498c89891a19c30b0c550f2a2d0b8e611']],
   ['assets/hmmwv-manual-cover.png', [918, 1188, '90b603ebaedecd7145e56e8c57e379f400f1fefd82ba6cc2b4a296172c169e1f']],
 ]);
 export const publicImagePaths = Object.freeze([...reviewed.keys()]);
